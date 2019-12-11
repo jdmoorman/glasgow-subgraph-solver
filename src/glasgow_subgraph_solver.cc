@@ -126,10 +126,8 @@ auto main(int argc, char * argv[]) -> int
             ("minimal-unsat-pattern",                          "Find a minimal unsat pattern graph, if unsat (experimental)")
             ("distance3",                                      "Use distance 3 filtering (experimental)")
             ("k4",                                             "Use 4-clique filtering (experimental)")
-            ("diamond",                                        "Use diamond filtering (experimental)")
             ("n-exact-path-graphs",       po::value<int>(),    "Specify number of exact path graphs")
-            ("n-common-neighbour-graphs", po::value<int>(),    "Specify number of common neighbour graphs")
-            ("skip-common-neighbour-graphs", po::value<int>(), "Specify number of common neighbour graphs to skip");
+            ("n-common-neighbour-graphs", po::value<int>(),    "Specify number of common neighbour graphs");
 
         po::options_description all_options{ "All options" };
         all_options.add_options()
@@ -259,13 +257,10 @@ auto main(int argc, char * argv[]) -> int
         params.common_neighbour_shapes = options_vars.count("common-neighbour-shapes");
         params.distance3 = options_vars.count("distance3");
         params.k4 = options_vars.count("k4");
-        params.diamond = options_vars.count("diamond");
         if (options_vars.count("n-exact-path-graphs"))
             params.number_of_exact_path_graphs = options_vars["n-exact-path-graphs"].as<int>();
         if (options_vars.count("n-common-neighbour-graphs"))
             params.number_of_common_neighbour_graphs = options_vars["n-common-neighbour-graphs"].as<int>();
-        if (options_vars.count("skip-common-neighbour-graphs"))
-            params.skip_common_neighbour_graphs = options_vars["skip-common-neighbour-graphs"].as<int>();
         params.no_supplementals = options_vars.count("no-supplementals");
         params.no_nds = options_vars.count("no-nds");
 

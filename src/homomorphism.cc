@@ -75,10 +75,9 @@ namespace
     {
         return 1 +
             (supports_exact_path_graphs(params) ? params.number_of_exact_path_graphs : 0) +
-            (supports_common_neighbour_shapes(params) ? params.number_of_common_neighbour_graphs - params.skip_common_neighbour_graphs : 0) +
+            (supports_common_neighbour_shapes(params) ? params.number_of_common_neighbour_graphs : 0) +
             (supports_distance3_graphs(params) ? 1 : 0) +
-            (supports_k4_graphs(params) ? 1 : 0) +
-            (supports_diamond_graphs(params) ? 1 : 0);
+            (supports_k4_graphs(params) ? 1 : 0);
     }
 
     template <typename BitSetType_, typename ArrayType_, typename PatternAdjacencyBitsType_>
@@ -289,55 +288,21 @@ namespace
             for (unsigned i = 0 ; i < target_size ; ++i)
                 largest_target_degree = max(largest_target_degree, targets_degrees[0][i]);
 
+            // build shape graphs
             unsigned next_pattern_supplemental = 1, next_target_supplemental = 1;
-            // build exact path graphs
-            if (supports_exact_path_graphs(params)) {
-                switch (params.number_of_exact_path_graphs) {
-                    case 1:
-                        build_exact_path_graphs<1>(pattern_graph_rows, pattern_size, next_pattern_supplemental);
-                        build_exact_path_graphs<1>(target_graph_rows, target_size, next_target_supplemental);
-                        break;
-                    case 2:
-                        build_exact_path_graphs<2>(pattern_graph_rows, pattern_size, next_pattern_supplemental);
-                        build_exact_path_graphs<2>(target_graph_rows, target_size, next_target_supplemental);
-                        break;
-                    case 3:
-                        build_exact_path_graphs<3>(pattern_graph_rows, pattern_size, next_pattern_supplemental);
-                        build_exact_path_graphs<3>(target_graph_rows, target_size, next_target_supplemental);
-                        break;
-                    case 4:
-                        build_exact_path_graphs<4>(pattern_graph_rows, pattern_size, next_pattern_supplemental);
-                        build_exact_path_graphs<4>(target_graph_rows, target_size, next_target_supplemental);
-                        break;
-                    case 5:
-                        build_exact_path_graphs<5>(pattern_graph_rows, pattern_size, next_pattern_supplemental);
-                        build_exact_path_graphs<5>(target_graph_rows, target_size, next_target_supplemental);
-                        break;
-                    default:
-                        throw UnsupportedConfiguration{ "Unsupported number of exact path graphs" };
-                }
 
-                if (supports_common_neighbour_shapes(params)) {
-                    build_common_neighbour_graphs(params.number_of_common_neighbour_graphs,
-                            params.skip_common_neighbour_graphs, pattern_graph_rows, pattern_size, next_pattern_supplemental);
-                    build_common_neighbour_graphs(params.number_of_common_neighbour_graphs,
-                            params.skip_common_neighbour_graphs, target_graph_rows, target_size, next_target_supplemental);
-                }
+            if (supports_exact_path_graphs(params) || supports_k4_graphs(params)) {
+                build_distance2ish_graphs(pattern_graph_rows, pattern_size, next_pattern_supplemental,
+                        supports_exact_path_graphs(params), supports_common_neighbour_shapes(params), supports_k4_graphs(params),
+                        params.number_of_exact_path_graphs, params.number_of_common_neighbour_graphs);
+                build_distance2ish_graphs(target_graph_rows, target_size, next_target_supplemental,
+                        supports_exact_path_graphs(params), supports_common_neighbour_shapes(params), supports_k4_graphs(params),
+                        params.number_of_exact_path_graphs, params.number_of_common_neighbour_graphs);
             }
 
             if (supports_distance3_graphs(params)) {
                 build_distance3_graphs(pattern_graph_rows, pattern_size, next_pattern_supplemental);
                 build_distance3_graphs(target_graph_rows, target_size, next_target_supplemental);
-            }
-
-            if (supports_k4_graphs(params)) {
-                build_k4_or_diamond_graphs(true, pattern_graph_rows, pattern_size, next_pattern_supplemental);
-                build_k4_or_diamond_graphs(true, target_graph_rows, target_size, next_target_supplemental);
-            }
-
-            if (supports_diamond_graphs(params)) {
-                build_k4_or_diamond_graphs(false, pattern_graph_rows, pattern_size, next_pattern_supplemental);
-                build_k4_or_diamond_graphs(false, target_graph_rows, target_size, next_target_supplemental);
             }
 
             if (next_pattern_supplemental != max_graphs || next_target_supplemental != max_graphs)
@@ -372,38 +337,72 @@ namespace
             return true;
         }
 
-        template <unsigned number_of_exact_path_graphs_, typename PossiblySomeOtherBitSetType_>
-        auto build_exact_path_graphs(vector<PossiblySomeOtherBitSetType_> & graph_rows, unsigned size, unsigned & idx) -> void
+        template <typename PossiblySomeOtherBitSetType_>
+        auto build_distance2ish_graphs(vector<PossiblySomeOtherBitSetType_> & graph_rows, unsigned size, unsigned & idx,
+                bool exact_paths, bool common_neighbour_shapes, bool k4s, unsigned number_of_exact_path_graphs,
+                unsigned number_of_common_neighbour_graphs) -> void
         {
-            vector<vector<unsigned> > path_counts(size, vector<unsigned>(size, 0));
-
-            // count number of paths from w to v (only w >= v, so not v to w)
             for (unsigned v = 0 ; v < size ; ++v) {
                 auto nv = graph_rows[v * max_graphs + 0];
-                for (auto c = nv.find_first() ; c != decltype(nv)::npos ; c = nv.find_first()) {
-                    nv.reset(c);
-                    auto nc = graph_rows[c * max_graphs + 0];
-                    for (auto w = nc.find_first() ; w != decltype(nc)::npos && w <= v ; w = nc.find_first()) {
-                        nc.reset(w);
-                        ++path_counts[v][w];
-                    }
-                }
-            }
+                for (unsigned w = 0 ; w < v ; ++w) {
+                    int local_idx = idx;
 
-            for (unsigned v = 0 ; v < size ; ++v) {
-                for (unsigned w = v ; w < size ; ++w) {
-                    // w to v, not v to w, see above
-                    unsigned path_count = path_counts[w][v];
-                    for (unsigned p = 1 ; p <= number_of_exact_path_graphs_ ; ++p) {
-                        if (path_count >= p) {
-                            graph_rows[v * max_graphs + idx + p - 1].set(w);
-                            graph_rows[w * max_graphs + idx + p - 1].set(v);
+                    auto common_neighbours = graph_rows[w * max_graphs + 0];
+                    common_neighbours &= nv;
+                    common_neighbours.reset(v);
+                    common_neighbours.reset(w);
+                    auto count = common_neighbours.count();
+
+                    // 2-paths
+                    if (exact_paths) {
+                        for (unsigned n = 1 ; n <= number_of_exact_path_graphs ; ++n) {
+                            if (count >= n) {
+                                graph_rows[v * max_graphs + local_idx + n - 1].set(w);
+                                graph_rows[w * max_graphs + local_idx + n - 1].set(v);
+                            }
+                        }
+                        local_idx += number_of_exact_path_graphs;
+                    }
+
+                    if (common_neighbour_shapes) {
+                        if (nv.test(w)) {
+                            for (unsigned n = 1 ; n <= number_of_common_neighbour_graphs ; ++n) {
+                                if (count >= n) {
+                                    graph_rows[v * max_graphs + local_idx + n - 1].set(w);
+                                    graph_rows[w * max_graphs + local_idx + n - 1].set(v);
+                                }
+                            }
+                        }
+                        local_idx += number_of_common_neighbour_graphs;
+                    }
+
+                    // k4 filtering: needs v -- w, and two of the common neighbours have an edge between them
+                    if (k4s) {
+                        ++local_idx;
+                        if (nv.test(w) && count >= 2) {
+                            bool done = false;
+                            auto cn1 = common_neighbours;
+                            for (auto x = cn1.find_first() ; x != decltype(cn1)::npos && ! done ; x = cn1.find_first()) {
+                                cn1.reset(x);
+                                auto cn2 = common_neighbours;
+                                for (auto y = cn2.find_first() ; y != decltype(cn2)::npos && ! done ; y = cn2.find_first()) {
+                                    cn2.reset(y);
+                                    if (v != w && v != x && v != y && w != x && w != y && graph_rows[x * max_graphs + 0].test(y)) {
+                                        graph_rows[v * max_graphs + local_idx].set(w);
+                                        graph_rows[w * max_graphs + local_idx].set(v);
+                                        done = true;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            idx += number_of_exact_path_graphs_;
+            if (exact_paths)
+                idx += number_of_exact_path_graphs;
+            if (k4s)
+                ++idx;
         }
 
         template <typename PossiblySomeOtherBitSetType_>
@@ -423,72 +422,6 @@ namespace
             }
 
             ++idx;
-        }
-
-        template <typename PossiblySomeOtherBitSetType_>
-        auto build_k4_or_diamond_graphs(bool k4, vector<PossiblySomeOtherBitSetType_> & graph_rows, unsigned size, unsigned & idx) -> void
-        {
-            for (unsigned v = 0 ; v < size ; ++v) {
-                auto nv = graph_rows[v * max_graphs + 0];
-                for (unsigned w = 0 ; w < v ; ++w) {
-                    // in k4, v -- w, but in a diamond we don't mind
-                    if ((! k4) || (nv.test(w))) {
-                        // are there two common neighbours with an edge between them?
-                        auto common_neighbours = graph_rows[w * max_graphs + 0];
-                        common_neighbours &= nv;
-                        common_neighbours.reset(v);
-                        common_neighbours.reset(w);
-                        auto count = common_neighbours.count();
-                        if (count >= 2) {
-                            bool done = false;
-                            auto cn1 = common_neighbours;
-                            for (auto x = cn1.find_first() ; x != decltype(cn1)::npos && ! done ; x = cn1.find_first()) {
-                                cn1.reset(x);
-                                auto cn2 = common_neighbours;
-                                for (auto y = cn2.find_first() ; y != decltype(cn2)::npos && ! done ; y = cn2.find_first()) {
-                                    cn2.reset(y);
-                                    if (v != w && v != x && v != y && w != x && w != y && graph_rows[x * max_graphs + 0].test(y)) {
-                                        graph_rows[v * max_graphs + idx].set(w);
-                                        graph_rows[w * max_graphs + idx].set(v);
-                                        done = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            ++idx;
-        }
-
-        template <typename PossiblySomeOtherBitSetType_>
-        auto build_common_neighbour_graphs(
-                unsigned number_of_common_neighbour_graphs,
-                unsigned skip_common_neighbour_graphs,
-                vector<PossiblySomeOtherBitSetType_> & graph_rows, unsigned size, unsigned & idx) -> void
-        {
-            for (unsigned v = 0 ; v < size ; ++v) {
-                auto nv = graph_rows[v * max_graphs + 0];
-                for (unsigned w = 0 ; w < v ; ++w) {
-                    if (nv.test(w)) {
-                        auto common_neighbours = graph_rows[w * max_graphs + 0];
-                        common_neighbours &= nv;
-                        common_neighbours.reset(v);
-                        common_neighbours.reset(w);
-                        auto count = common_neighbours.count();
-
-                        for (unsigned p = 1 + skip_common_neighbour_graphs ; p <= number_of_common_neighbour_graphs ; ++p) {
-                            if (count >= p) {
-                                graph_rows[v * max_graphs + idx + p - 1 - skip_common_neighbour_graphs].set(w);
-                                graph_rows[w * max_graphs + idx + p - 1 - skip_common_neighbour_graphs].set(v);
-                            }
-                        }
-                    }
-                }
-            }
-
-            idx += number_of_common_neighbour_graphs - skip_common_neighbour_graphs;
         }
     };
 
