@@ -28,6 +28,7 @@
 
 #include <boost/thread/barrier.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
 using std::atomic;
 using std::conditional_t;
@@ -68,6 +69,8 @@ using std::chrono::operator""ms;
 
 using boost::barrier;
 using boost::dynamic_bitset;
+
+using boost::multiprecision::cpp_int;
 
 namespace
 {
@@ -1094,7 +1097,7 @@ namespace
                 const Domains & domains,
                 unsigned long long & nodes,
                 unsigned long long & propagations,
-                unsigned long long & solution_count,
+                cpp_int & solution_count,
                 int depth,
                 RestartsSchedule & restarts_schedule) -> SearchResult
         {
