@@ -15,6 +15,7 @@ SOURCES := \
     lackey.cc \
     proof.cc \
     restarts.cc \
+    sip_decomposer.cc \
     symmetries.cc \
     thread_utils.cc \
     timeout.cc \
