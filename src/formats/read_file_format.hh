@@ -9,13 +9,6 @@
 #include <string>
 
 /**
- * Detect a graph file format.
- *
- * \throw GraphFileError
- */
-auto detect_file_format(std::ifstream & infile, const std::string & filename) -> std::string;
-
-/**
  * Read in a file in the specified format ("auto" to try to auto-detect).
  *
  * \throw GraphFileError
