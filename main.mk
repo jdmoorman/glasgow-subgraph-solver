@@ -4,10 +4,6 @@ TARGET_DIR := ./
 SUBMAKEFILES := \
     src/common.mk \
     src/glasgow_subgraph_solver.mk \
-    src/glasgow_clique_solver.mk \
-    src/glasgow_common_subgraph_solver.mk \
-    src/sip_to_opb.mk \
-    src/sip_to_lad.mk \
     src/plot_glasgow_solver_outputs.mk \
     src/plot_glasgow_solver_proofs.mk \
     src/create_random_graph.mk
