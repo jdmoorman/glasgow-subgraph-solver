@@ -25,7 +25,7 @@ class InputGraph
         /**
          * \param initial_size can be 0, if resize() is called afterwards.
          */
-        InputGraph(int initial_size, bool has_vertex_labels, bool has_edge_labels);
+        InputGraph(int initial_size, bool has_vertex_labels, bool has_edge_labels, bool directed, bool loopy);
 
         InputGraph(const InputGraph &) = delete;
 

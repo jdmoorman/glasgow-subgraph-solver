@@ -40,13 +40,14 @@ struct InputGraph::Imp
     bool loopy = false, directed = false;
 };
 
-InputGraph::InputGraph(int size, bool v, bool e) :
+InputGraph::InputGraph(int size, bool has_vertex_labels, bool has_edge_labels,
+    bool directed, bool loopy) :
     _imp(new Imp{ })
 {
-    _imp->has_vertex_labels = v;
-    _imp->has_edge_labels = e;
-    _imp->loopy = false;
-    _imp->directed = false;
+    _imp->has_vertex_labels = has_vertex_labels;
+    _imp->has_edge_labels = has_edge_labels;
+    _imp->directed = directed;
+    _imp->loopy = loopy;
 
     if (0 != size)
         resize(size);

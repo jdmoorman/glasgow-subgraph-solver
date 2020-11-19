@@ -27,7 +27,7 @@ namespace
         unordered_map<string, int> vertices;
         unordered_map<string, string> vertex_labels;
         vector<tuple<int, int, string> > edges;
-        bool seen_vertex_label = false, seen_edge_label = false, seen_directed_edge = false;
+        bool seen_vertex_label = false, seen_edge_label = false, seen_directed_edge = false, seen_loopy_edge = false;
 
         string line;
 
@@ -61,6 +61,9 @@ namespace
                 int left_idx = vertices.emplace(left, vertices.size()).first->second;
                 int right_idx = vertices.emplace(right, vertices.size()).first->second;
 
+                if (left_idx == right_idx)
+                    seen_loopy_edge = true;
+
                 if (! label.empty())
                     seen_edge_label = true;
 
@@ -75,7 +78,7 @@ namespace
             }
         }
 
-        InputGraph result{ int(vertices.size()), seen_vertex_label, seen_edge_label };
+        InputGraph result{ int(vertices.size()), seen_vertex_label, seen_edge_label, seen_directed_edge, seen_loopy_edge};
 
         for (auto & [ f, t, l ] : edges)
             result.add_directed_edge(f, t, l);

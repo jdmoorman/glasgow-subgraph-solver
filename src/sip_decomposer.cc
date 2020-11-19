@@ -66,7 +66,7 @@ auto solve_sip_by_decomposition(const InputGraph & pattern, const InputGraph & t
 
     if (! isolated_pattern_vertices.empty()) {
         InputGraph reduced_pattern(pattern.size() - isolated_pattern_vertices.size(), pattern.has_vertex_labels(),
-                pattern.has_edge_labels());
+                pattern.has_edge_labels(), pattern.directed(), pattern.loopy());
 
         vector<int> original_to_reduced, reduced_to_original;
 
@@ -132,4 +132,3 @@ auto solve_sip_by_decomposition(const InputGraph & pattern, const InputGraph & t
     else
         return solve_homomorphism_problem(pattern, target, params);
 }
-
