@@ -54,11 +54,6 @@ class InputGraph
         auto resize(int size) -> void;
 
         /**
-         * Add an edge from a to b (and from b to a).
-         */
-        auto add_edge(int a, int b) -> void;
-
-        /**
          * Add a directed edge from a to b, with a label.
          */
         auto add_directed_edge(int a, int b, std::string_view label) -> void;

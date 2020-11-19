@@ -64,13 +64,6 @@ auto InputGraph::resize(int size) -> void
 }
 
 // TODO: Modify for multigraph.
-auto InputGraph::add_edge(int a, int b) -> void
-{
-    _imp->edges.emplace(make_pair(a, b), "");
-    _imp->edges.emplace(make_pair(b, a), "");
-}
-
-// TODO: Modify for multigraph.
 auto InputGraph::add_directed_edge(int a, int b, string_view label) -> void
 {
     _imp->edges.emplace(make_pair(a, b), label).first->second = label;
