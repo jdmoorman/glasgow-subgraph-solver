@@ -78,14 +78,7 @@ namespace
         InputGraph result{ int(vertices.size()), seen_vertex_label, seen_edge_label };
 
         for (auto & [ f, t, l ] : edges)
-            if (seen_directed_edge)
-                result.add_directed_edge(f, t, l);
-            else if (seen_edge_label) {
-                result.add_directed_edge(f, t, l);
-                result.add_directed_edge(t, f, l);
-            }
-            else
-                result.add_edge(f, t);
+            result.add_directed_edge(f, t, l);
 
         auto rename = [&] (const string & s) -> string {
             if (rename_map) {
