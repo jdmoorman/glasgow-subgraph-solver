@@ -33,6 +33,7 @@ struct InputGraph::Imp
 {
     int size = 0;
     bool has_vertex_labels, has_edge_labels;
+    // TODO: Will need to change this edge map for multigraph.
     map<pair<int, int>, string> edges;
     vector<string> vertex_labels;
     Names vertex_names;
@@ -61,6 +62,7 @@ auto InputGraph::resize(int size) -> void
     _imp->vertex_labels.resize(size);
 }
 
+// TODO: Modify for multigraph.
 auto InputGraph::add_edge(int a, int b) -> void
 {
     _imp->edges.emplace(make_pair(a, b), "");
@@ -69,6 +71,7 @@ auto InputGraph::add_edge(int a, int b) -> void
         _imp->loopy = true;
 }
 
+// TODO: Modify for multigraph.
 auto InputGraph::add_directed_edge(int a, int b, string_view label) -> void
 {
     _imp->directed = true;
@@ -78,9 +81,9 @@ auto InputGraph::add_directed_edge(int a, int b, string_view label) -> void
         _imp->loopy = true;
 }
 
-auto InputGraph::adjacent(int a, int b) const -> bool
+auto InputGraph::loopy() const -> bool
 {
-    return _imp->edges.count({ a, b });
+    return _imp->loopy;
 }
 
 auto InputGraph::size() const -> int
@@ -88,16 +91,7 @@ auto InputGraph::size() const -> int
     return _imp->size;
 }
 
-auto InputGraph::number_of_directed_edges() const -> int
-{
-    return _imp->edges.size();
-}
-
-auto InputGraph::loopy() const -> bool
-{
-    return _imp->loopy;
-}
-
+// TODO: Modify for multigraph.
 auto InputGraph::degree(int a) const -> int
 {
     auto lower = _imp->edges.lower_bound({ a, 0 });
@@ -105,6 +99,9 @@ auto InputGraph::degree(int a) const -> int
     return distance(lower, upper);
 }
 
+//////////////
+// Vertices //
+//////////////
 auto InputGraph::set_vertex_label(int v, string_view l) -> void
 {
     _imp->vertex_labels[v] = l;
@@ -138,6 +135,22 @@ auto InputGraph::vertex_from_name(string_view n) const -> optional<int>
         return make_optional(it->second);
 }
 
+
+///////////
+// Edges //
+///////////
+
+// TODO: Modify for multigraph.
+auto InputGraph::adjacent(int a, int b) const -> bool
+{
+    return _imp->edges.count({ a, b });
+}
+
+auto InputGraph::number_of_directed_edges() const -> int
+{
+    return _imp->edges.size();
+}
+
 auto InputGraph::edge_label(int a, int b) const -> string_view
 {
     return _imp->edges.find({a, b})->second;
@@ -167,4 +180,3 @@ auto InputGraph::directed() const -> bool
 {
     return _imp->directed;
 }
-
