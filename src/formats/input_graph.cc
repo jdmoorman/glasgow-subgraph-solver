@@ -68,18 +68,12 @@ auto InputGraph::add_edge(int a, int b) -> void
 {
     _imp->edges.emplace(make_pair(a, b), "");
     _imp->edges.emplace(make_pair(b, a), "");
-    if (a == b)
-        _imp->loopy = true;
 }
 
 // TODO: Modify for multigraph.
 auto InputGraph::add_directed_edge(int a, int b, string_view label) -> void
 {
-    _imp->directed = true;
-
     _imp->edges.emplace(make_pair(a, b), label).first->second = label;
-    if (a == b)
-        _imp->loopy = true;
 }
 
 auto InputGraph::loopy() const -> bool
