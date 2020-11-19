@@ -22,13 +22,23 @@ if ! grep '^solution_count = 12$' <(./glasgow_subgraph_solver --count-solutions 
     exit 1
 fi
 
-if ! grep '^solution_count = 6$' <(./glasgow_subgraph_solver --count-solutions --induced test-instances/c3.csv test-instances/c3c2.csv ) ; then
+if ! grep '^solution_count = 6$' <(./glasgow_subgraph_solver --count-solutions --induced --format csv test-instances/c3.csv test-instances/c3c2.csv ) ; then
     echo "induced cyclic enumerate test failed" 1>&1
     exit 1
 fi
 
-if ! grep '^solution_count = 6$' <(./glasgow_subgraph_solver --count-solutions --induced test-instances/c3_with_labels.csv test-instances/c3c2_with_labels.csv ) ; then
+if ! grep '^solution_count = 474$' <(./glasgow_subgraph_solver --count-solutions --format csv test-instances/c3.csv test-instances/c3c2.csv ) ; then
     echo "induced cyclic enumerate test failed" 1>&1
+    exit 1
+fi
+
+if ! grep '^solution_count = 6$' <(./glasgow_subgraph_solver --count-solutions --induced --format csv test-instances/c3_with_labels.csv test-instances/c3c2_with_labels.csv ) ; then
+    echo "induced cyclic enumerate with channels test failed" 1>&1
+    exit 1
+fi
+
+if ! grep '^solution_count = 123$' <(./glasgow_subgraph_solver --count-solutions --format csv test-instances/c3_with_labels.csv test-instances/c3c2_with_labels.csv ) ; then
+    echo "cyclic enumerate test failed" 1>&1
     exit 1
 fi
 
