@@ -36,15 +36,18 @@ namespace
             if (string::npos == pos)
                 throw GraphFileError{ filename, "expected a comma but didn't get one", true };
 
-            string left = line.substr(0, pos), right = line.substr(pos + 1), label;
+            string left = line.substr(0, pos), right = line.substr(pos + 1);
             char delim = line.at(pos);
 
+            // Extract edge label if present.
+            string label;
             auto pos2 = right.find(',');
             if (string::npos != pos2) {
                 label = right.substr(pos2 + 1);
                 right = right.substr(0, pos2);
             }
 
+            // Row describes a vertex. Add vertex to vertices.
             if (right.empty() && ! left.empty()) {
                 if (! label.empty()) {
                     seen_vertex_label = true;
@@ -53,6 +56,7 @@ namespace
 
                 vertices.emplace(left, vertices.size());
             }
+            // Row describes an edge. Add edge to edges.
             else {
                 int left_idx = vertices.emplace(left, vertices.size()).first->second;
                 int right_idx = vertices.emplace(right, vertices.size()).first->second;
@@ -129,5 +133,3 @@ auto read_csv_name(std::ifstream && infile, const std::string & filename, const 
 
     return read_csv(move(infile), filename, rename_map);
 }
-
-

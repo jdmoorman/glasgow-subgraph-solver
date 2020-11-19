@@ -109,6 +109,8 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
     }
 
     // re-encode and store edge labels
+    // Maps each unique edge_label to an integer 1 to num_edge_labels.
+    // TODO: abstract to function for both target and pattern
     map<string, int> edge_labels_map;
     int next_edge_label = 1;
     if (pattern.has_edge_labels()) {
@@ -116,6 +118,8 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
         for (unsigned i = 0 ; i < pattern_size ; ++i)
             for (unsigned j = 0 ; j < pattern_size ; ++j)
                 if (pattern.adjacent(i, j)) {
+                    // r.first iterator to element, r.second = true if inserted
+                    // r.first iterator to existing map element, r.second = false if not inserted
                     auto r = edge_labels_map.emplace(pattern.edge_label(i, j), next_edge_label);
                     if (r.second)
                         ++next_edge_label;
@@ -158,6 +162,7 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
     }
 
     // target edge labels
+    // TODO: abstract to function for both target and pattern
     if (pattern.has_edge_labels()) {
         _imp->target_edge_labels.resize(target_size * target_size);
         for (auto e = target.begin_edges(), e_end = target.end_edges() ; e != e_end ; ++e) {
@@ -809,4 +814,3 @@ auto HomomorphismModel::directed() const -> bool
 {
     return _imp->directed;
 }
-

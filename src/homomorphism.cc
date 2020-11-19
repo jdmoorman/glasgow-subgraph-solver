@@ -78,6 +78,7 @@ namespace
         {
             HomomorphismResult result;
 
+            // Set of values for a given variable (node). i.e. node candidates
             // domains
             Domains domains(model.pattern_size, HomomorphismDomain{ model.target_size });
             if (! model.initialise_domains(domains)) {
@@ -524,4 +525,3 @@ auto solve_homomorphism_problem(
         return result;
     }
 }
-

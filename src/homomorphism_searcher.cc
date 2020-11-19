@@ -425,7 +425,12 @@ auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & 
             for (auto c = check_d_values.find_first() ; c != decltype(check_d_values)::npos ; c = check_d_values.find_first()) {
                 check_d_values.reset(c);
 
+                //TODO: add for loop over channels for current_assignment.pattern_vertex, d.v
+                //      reset c only if there are no matching channels?
+                //      alternativey change check_d_values to incorporate channel/label
+
                 auto got_forward_label = model.target_edge_label(current_assignment.target_vertex, c);
+                // TODO: Need to change this compatibility function.
                 if (got_forward_label != want_forward_label)
                     d.values.reset(c);
             }
@@ -670,4 +675,3 @@ auto HomomorphismSearcher::set_seed(int t) -> void
 {
     global_rand.seed(t);
 }
-
