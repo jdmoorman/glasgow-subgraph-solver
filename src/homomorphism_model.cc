@@ -95,9 +95,11 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
     }
 
     // re-encode and store pattern labels
+    // TODO: condense repeated code.
     map<string, int> vertex_labels_map;
     int next_vertex_label = 1;
     if (pattern.has_vertex_labels()) {
+        // target vertex labels
         for (unsigned i = 0 ; i < pattern_size ; ++i) {
             if (vertex_labels_map.emplace(pattern.vertex_label(i), next_vertex_label).second)
                 ++next_vertex_label;
@@ -106,25 +108,31 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
         _imp->pattern_vertex_labels.resize(pattern_size);
         for (unsigned i = 0 ; i < pattern_size ; ++i)
             _imp->pattern_vertex_labels[i] = vertex_labels_map.find(string{ pattern.vertex_label(i) })->second;
+
+        // target vertex labels
+        for (unsigned i = 0 ; i < target_size ; ++i) {
+            if (vertex_labels_map.emplace(target.vertex_label(i), next_vertex_label).second)
+                ++next_vertex_label;
+        }
+
+        _imp->target_vertex_labels.resize(target_size);
+        for (unsigned i = 0 ; i < target_size ; ++i)
+            _imp->target_vertex_labels[i] = vertex_labels_map.find(string{ target.vertex_label(i) })->second;
     }
 
+
     // re-encode and store edge labels
-    // Maps each unique edge_label to an integer 1 to num_edge_labels.
-    // TODO: abstract to function for both target and pattern
+    // Map each unique edge_label to an integer 1 to num_edge_labels.
     map<string, int> edge_labels_map;
     int next_edge_label = 1;
     if (pattern.has_edge_labels()) {
+        // Resize vector recording integers corresponding to each edge's label.
         _imp->pattern_edge_labels.resize(pattern_size * pattern_size);
-        for (unsigned i = 0 ; i < pattern_size ; ++i)
-            for (unsigned j = 0 ; j < pattern_size ; ++j)
-                if (pattern.adjacent(i, j)) {
-                    // r.first iterator to element, r.second = true if inserted
-                    // r.first iterator to existing map element, r.second = false if not inserted
-                    auto r = edge_labels_map.emplace(pattern.edge_label(i, j), next_edge_label);
-                    if (r.second)
-                        ++next_edge_label;
-                    _imp->pattern_edge_labels[i * pattern_size + j] = r.first->second;
-                }
+        _imp->target_edge_labels.resize(target_size * target_size);
+
+        // Fill edge_labels_map labels -> int and edge_labels with labels.
+        _record_edge_labels(edge_labels_map, pattern, _imp->pattern_edge_labels, next_edge_label);
+        _record_edge_labels(edge_labels_map, target, _imp->target_edge_labels, next_edge_label);
     }
 
     // recode target to a bit graph, and take out loops
@@ -146,31 +154,6 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
                 _imp->forward_target_graph_rows[e->first.first].set(e->first.second);
                 _imp->reverse_target_graph_rows[e->first.second].set(e->first.first);
             }
-        }
-    }
-
-    // target vertex labels
-    if (pattern.has_vertex_labels()) {
-        for (unsigned i = 0 ; i < target_size ; ++i) {
-            if (vertex_labels_map.emplace(target.vertex_label(i), next_vertex_label).second)
-                ++next_vertex_label;
-        }
-
-        _imp->target_vertex_labels.resize(target_size);
-        for (unsigned i = 0 ; i < target_size ; ++i)
-            _imp->target_vertex_labels[i] = vertex_labels_map.find(string{ target.vertex_label(i) })->second;
-    }
-
-    // target edge labels
-    // TODO: abstract to function for both target and pattern
-    if (pattern.has_edge_labels()) {
-        _imp->target_edge_labels.resize(target_size * target_size);
-        for (auto e = target.begin_edges(), e_end = target.end_edges() ; e != e_end ; ++e) {
-            auto r = edge_labels_map.emplace(e->second, next_edge_label);
-            if (r.second)
-                ++next_edge_label;
-
-            _imp->target_edge_labels[e->first.first * target_size + e->first.second] = r.first->second;
         }
     }
 
@@ -213,6 +196,16 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
 }
 
 HomomorphismModel::~HomomorphismModel() = default;
+
+auto HomomorphismModel::_record_edge_labels(map<string, int>& label_map, const InputGraph & graph, vector<int>& graph_edge_labels, int & next_edge_label) -> void
+{
+    for (auto e = graph.begin_edges(), e_end = graph.end_edges() ; e != e_end ; ++e) {
+        auto r = label_map.emplace(e->second, next_edge_label);
+        if (r.second)
+            ++next_edge_label;
+        graph_edge_labels[e->first.first * graph.size() + e->first.second] = r.first->second;
+    }
+}
 
 auto HomomorphismModel::_check_label_compatibility(int p, int t) const -> bool
 {

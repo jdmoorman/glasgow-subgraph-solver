@@ -37,6 +37,8 @@ class HomomorphismModel
 
         auto _check_label_compatibility(int p, int t) const -> bool;
 
+        auto _record_edge_labels(std::map<std::string, int>& label_map, const InputGraph & graph, std::vector<int>& graph_edge_labels, int & next_edge_label) -> void;
+
     public:
         using PatternAdjacencyBitsType = uint8_t;
 
