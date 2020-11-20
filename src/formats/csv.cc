@@ -66,6 +66,8 @@ namespace
 
                 if (! label.empty())
                     seen_edge_label = true;
+                    // BUG. Not sure why we need this. Removing causes Segmentation fault.
+                    seen_directed_edge = true;
 
                 if (delim == '>') {
                     seen_directed_edge = true;
