@@ -244,7 +244,7 @@ auto HomomorphismModel::_check_edge_label_compatibility(const multiset<string>& 
 
     // Check compatibility for each label.
     for (const auto & [label, count] : label_counts1) {
-        if (label_counts2.find(label) != label_counts2.end() || count > label_counts2[label])
+        if (label_counts2.find(label) == label_counts2.end() || count > label_counts2[label])
             return false;
     }
     return true;
@@ -830,6 +830,11 @@ auto HomomorphismModel::pattern_edge_label(int p, int q) const -> int
 auto HomomorphismModel::target_edge_label(int t, int u) const -> int
 {
     return _imp->target_edge_labels[t * target_size + u];
+}
+
+auto HomomorphismModel::edge_label_compatibility(int p_lid, int t_lid) const -> bool
+{
+    return _imp->edge_label_compatibility[p_lid][t_lid];
 }
 
 auto HomomorphismModel::pattern_has_loop(int p) const -> bool

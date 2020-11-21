@@ -79,6 +79,7 @@ class HomomorphismModel
         auto target_vertex_label(int p) const -> int;
         auto pattern_edge_label(int p, int q) const -> int;
         auto target_edge_label(int t, int u) const -> int;
+        auto edge_label_compatibility(int p_lid, int t_lid) const -> bool;
 
         auto pattern_has_loop(int p) const -> bool;
         auto target_has_loop(int t) const -> bool;
