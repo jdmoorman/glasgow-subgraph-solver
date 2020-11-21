@@ -10,6 +10,7 @@
 #include "proof.hh"
 
 #include <memory>
+#include <set>
 
 class HomomorphismModel
 {
@@ -37,7 +38,7 @@ class HomomorphismModel
 
         auto _check_label_compatibility(int p, int t) const -> bool;
 
-        auto _record_edge_labels(std::map<std::vector<std::string>, int>& label_map, const InputGraph & graph, std::vector<int>& graph_edge_labels) -> void;
+        auto _record_edge_labels(std::map<std::multiset<std::string>, int>& label_map, const InputGraph & graph, std::vector<int>& graph_edge_labels) -> void;
 
     public:
         using PatternAdjacencyBitsType = uint8_t;

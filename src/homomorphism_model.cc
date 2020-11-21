@@ -23,6 +23,7 @@ using std::string;
 using std::string_view;
 using std::to_string;
 using std::vector;
+using std::multiset;
 
 namespace
 {
@@ -124,7 +125,7 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
 
     // re-encode and store edge labels
     // Map each unique edge_label to an integer 1 to num_edge_labels.
-    map<vector<string>, int> pattern_edge_labels_map, target_edge_labels_map;
+    map<multiset<string>, int> pattern_edge_labels_map, target_edge_labels_map;
     if (pattern.has_edge_labels()) {
         // Resize vector recording integers corresponding to each edge's label.
         _imp->pattern_edge_labels.resize(pattern_size * pattern_size);
@@ -197,7 +198,7 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
 
 HomomorphismModel::~HomomorphismModel() = default;
 
-auto HomomorphismModel::_record_edge_labels(map<vector<string>, int>& label_map, const InputGraph & graph, vector<int>& graph_edge_labels) -> void
+auto HomomorphismModel::_record_edge_labels(map<multiset<string>, int>& label_map, const InputGraph & graph, vector<int>& graph_edge_labels) -> void
 {
     int next_edge_label = 1;
     for (auto e = graph.begin_edges(), e_end = graph.end_edges() ; e != e_end ; ++e) {

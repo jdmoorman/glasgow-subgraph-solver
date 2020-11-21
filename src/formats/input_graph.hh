@@ -7,6 +7,7 @@
 #include <memory>
 #include <optional>
 #include <string_view>
+#include <set>
 
 /**
  * A graph, in a convenient format for reading in from files. We don't do any
@@ -98,11 +99,11 @@ class InputGraph
         /**
          * What is the label associated with a given edge?
          */
-        auto edge_label(int a, int b) const -> std::vector<std::string>;
+        auto edge_label(int a, int b) const -> std::multiset<std::string>;
 
         auto has_edge_labels() const -> bool;
 
-        using EdgesIterator = std::map<std::pair<int, int>, std::vector<std::string>>::const_iterator;
+        using EdgesIterator = std::map<std::pair<int, int>, std::multiset<std::string>>::const_iterator;
 
         auto begin_edges() const -> EdgesIterator;
 
