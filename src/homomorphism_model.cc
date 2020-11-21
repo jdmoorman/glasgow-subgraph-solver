@@ -200,7 +200,7 @@ HomomorphismModel::~HomomorphismModel() = default;
 
 auto HomomorphismModel::_record_edge_labels(map<multiset<string>, int>& label_map, const InputGraph & graph, vector<int>& graph_edge_labels) -> void
 {
-    int next_edge_label = 1;
+    int next_edge_label = 0;
     for (auto e = graph.begin_edges(), e_end = graph.end_edges() ; e != e_end ; ++e) {
         auto r = label_map.emplace(e->second, next_edge_label);
         if (r.second)
