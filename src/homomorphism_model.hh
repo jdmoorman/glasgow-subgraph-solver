@@ -34,9 +34,13 @@ class HomomorphismModel
                 bool do_not_do_nds_yet
                 ) const -> bool;
 
+        auto _check_edge_label_compatibility(const std::multiset<std::string>&, const std::multiset<std::string>&) const -> bool;
+
         auto _check_loop_compatibility(int p, int t) const -> bool;
 
         auto _check_label_compatibility(int p, int t) const -> bool;
+
+        auto _label_counts_from_multiset(const std::multiset<std::string>&) const -> std::map<std::string, int>;
 
         auto _record_edge_labels(std::map<std::multiset<std::string>, int>& label_map, const InputGraph & graph, std::vector<int>& graph_edge_labels) -> void;
 

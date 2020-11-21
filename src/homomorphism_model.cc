@@ -45,7 +45,7 @@ struct HomomorphismModel::Imp
     vector<SVOBitset> target_graph_rows, forward_target_graph_rows, reverse_target_graph_rows;
 
     vector<vector<int> > patterns_degrees, targets_degrees;
-    vector<vector<bool> > label_compatibility;
+    vector<vector<bool> > edge_label_compatibility;
     int largest_target_degree = 0;
     bool has_less_thans = false, directed = false;
 
@@ -134,8 +134,23 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
         // Fill edge_labels_map labels -> int and edge_labels with labels.
         _record_edge_labels(pattern_edge_labels_map, pattern, _imp->pattern_edge_labels);
         _record_edge_labels(target_edge_labels_map, target, _imp->target_edge_labels);
+
+        // // TODO: Find better way to get indices.
+        // Form edge compatibility matrix.
+        _imp->edge_label_compatibility.resize(pattern_edge_labels_map.size(), vector<bool>(target_edge_labels_map.size()));
+        int i = 0;
+        for (const auto& [labels1, label1_id] : pattern_edge_labels_map) {
+            int j = 0;
+            for (const auto& [labels2, label2_id] : target_edge_labels_map) {
+                _imp->edge_label_compatibility[i][j] = _check_edge_label_compatibility(labels1, labels2);
+                j += 1;
+            }
+            i += 1;
+        }
+
     }
 
+    // TODO: read and see if these need to be adjusted.
     // recode target to a bit graph, and take out loops
     _imp->target_graph_rows.resize(target_size * max_graphs, SVOBitset{ target_size, 0 });
     _imp->target_loops.resize(target_size);
@@ -209,6 +224,33 @@ auto HomomorphismModel::_record_edge_labels(map<multiset<string>, int>& label_ma
     }
 }
 
+auto HomomorphismModel::_label_counts_from_multiset(const multiset<string>& labels) const -> map<string, int>
+{
+    map<string, int> label_counts;
+    for (const auto & label : labels) {
+        if (!label_counts.emplace(label, 1).second)
+            label_counts.emplace(label, 1).first->second += 1;
+    }
+    return label_counts;
+}
+
+/** Check that at least as many of each label occur for the target as pattern edge.
+*/
+auto HomomorphismModel::_check_edge_label_compatibility(const multiset<string>& labels1, const multiset<string>& labels2) const -> bool
+{
+    // Map labels to the number of occurences for each multiset.
+    map<string, int> label_counts1 = _label_counts_from_multiset(labels1);
+    map<string, int> label_counts2 = _label_counts_from_multiset(labels2);
+
+    // Check compatibility for each label.
+    for (const auto & [label, count] : label_counts1) {
+        if (label_counts2.find(label) != label_counts2.end() || count > label_counts2[label])
+            return false;
+    }
+    return true;
+}
+
+// TODO: change name
 auto HomomorphismModel::_check_label_compatibility(int p, int t) const -> bool
 {
     if (! has_vertex_labels())
