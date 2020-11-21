@@ -56,7 +56,7 @@ class InputGraph
         /**
          * Add a directed edge from a to b, with a label.
          */
-        auto add_directed_edge(int a, int b, std::string_view label) -> void;
+        auto add_directed_edge(int a, int b, std::string label) -> void;
 
         /**
          * Are vertices a and b adjacent?
@@ -98,11 +98,11 @@ class InputGraph
         /**
          * What is the label associated with a given edge?
          */
-        auto edge_label(int a, int b) const -> std::string_view;
+        auto edge_label(int a, int b) const -> std::vector<std::string>;
 
         auto has_edge_labels() const -> bool;
 
-        using EdgesIterator = std::map<std::pair<int, int>, std::string>::const_iterator;
+        using EdgesIterator = std::map<std::pair<int, int>, std::vector<std::string>>::const_iterator;
 
         auto begin_edges() const -> EdgesIterator;
 

@@ -44,6 +44,7 @@ struct HomomorphismModel::Imp
     vector<SVOBitset> target_graph_rows, forward_target_graph_rows, reverse_target_graph_rows;
 
     vector<vector<int> > patterns_degrees, targets_degrees;
+    vector<vector<bool> > label_compatibility;
     int largest_target_degree = 0;
     bool has_less_thans = false, directed = false;
 
@@ -123,16 +124,15 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
 
     // re-encode and store edge labels
     // Map each unique edge_label to an integer 1 to num_edge_labels.
-    map<string, int> edge_labels_map;
-    int next_edge_label = 1;
+    map<vector<string>, int> pattern_edge_labels_map, target_edge_labels_map;
     if (pattern.has_edge_labels()) {
         // Resize vector recording integers corresponding to each edge's label.
         _imp->pattern_edge_labels.resize(pattern_size * pattern_size);
         _imp->target_edge_labels.resize(target_size * target_size);
 
         // Fill edge_labels_map labels -> int and edge_labels with labels.
-        _record_edge_labels(edge_labels_map, pattern, _imp->pattern_edge_labels, next_edge_label);
-        _record_edge_labels(edge_labels_map, target, _imp->target_edge_labels, next_edge_label);
+        _record_edge_labels(pattern_edge_labels_map, pattern, _imp->pattern_edge_labels);
+        _record_edge_labels(target_edge_labels_map, target, _imp->target_edge_labels);
     }
 
     // recode target to a bit graph, and take out loops
@@ -150,7 +150,7 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
         _imp->forward_target_graph_rows.resize(target_size, SVOBitset{ target_size, 0 });
         _imp->reverse_target_graph_rows.resize(target_size, SVOBitset{ target_size, 0 });
         for (auto e = target.begin_edges(), e_end = target.end_edges() ; e != e_end ; ++e) {
-            if (e->first.first != e->first.second && e->second != "unlabelled") {
+            if (e->first.first != e->first.second) {
                 _imp->forward_target_graph_rows[e->first.first].set(e->first.second);
                 _imp->reverse_target_graph_rows[e->first.second].set(e->first.first);
             }
@@ -197,8 +197,9 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
 
 HomomorphismModel::~HomomorphismModel() = default;
 
-auto HomomorphismModel::_record_edge_labels(map<string, int>& label_map, const InputGraph & graph, vector<int>& graph_edge_labels, int & next_edge_label) -> void
+auto HomomorphismModel::_record_edge_labels(map<vector<string>, int>& label_map, const InputGraph & graph, vector<int>& graph_edge_labels) -> void
 {
+    int next_edge_label = 1;
     for (auto e = graph.begin_edges(), e_end = graph.end_edges() ; e != e_end ; ++e) {
         auto r = label_map.emplace(e->second, next_edge_label);
         if (r.second)

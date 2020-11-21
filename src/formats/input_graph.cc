@@ -34,7 +34,7 @@ struct InputGraph::Imp
     int size = 0;
     bool has_vertex_labels, has_edge_labels;
     // TODO: Will need to change this edge map for multigraph.
-    map<pair<int, int>, string> edges;
+    map<pair<int, int>, vector<string> > edges;
     vector<string> vertex_labels;
     Names vertex_names;
     bool loopy = false, directed = false;
@@ -64,13 +64,13 @@ auto InputGraph::resize(int size) -> void
 }
 
 // TODO: Modify for multigraph.
-auto InputGraph::add_directed_edge(int a, int b, string_view label) -> void
+auto InputGraph::add_directed_edge(int a, int b, string label) -> void
 {
-    // Add edge. Append to Label if edge already exists.
-    // TODO: Change label from string to set of labels.
-    if(!_imp->edges.emplace(make_pair(a, b), label).second) {
-        _imp->edges.emplace(make_pair(a, b), label).first->second += ",";
-        _imp->edges.emplace(make_pair(a, b), label).first->second += label;
+    // Add edge. Append to label vector if edge already exists.
+    vector<string> label_vector;
+    label_vector.push_back(label);
+    if(!_imp->edges.emplace(make_pair(a, b), label_vector).second) {
+        _imp->edges.emplace(make_pair(a, b), label_vector).first->second.push_back(label);
     }
 }
 
@@ -144,7 +144,7 @@ auto InputGraph::number_of_directed_edges() const -> int
     return _imp->edges.size();
 }
 
-auto InputGraph::edge_label(int a, int b) const -> string_view
+auto InputGraph::edge_label(int a, int b) const -> vector<string>
 {
     return _imp->edges.find({a, b})->second;
 }
