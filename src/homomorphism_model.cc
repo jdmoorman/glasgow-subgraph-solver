@@ -138,14 +138,11 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
         // // TODO: Find better way to get indices.
         // Form edge compatibility matrix.
         _imp->edge_label_compatibility.resize(pattern_edge_labels_map.size(), vector<bool>(target_edge_labels_map.size()));
-        int i = 0;
         for (const auto& [labels1, label1_id] : pattern_edge_labels_map) {
-            int j = 0;
             for (const auto& [labels2, label2_id] : target_edge_labels_map) {
-                _imp->edge_label_compatibility[i][j] = _check_edge_label_compatibility(labels1, labels2);
-                j += 1;
+                // TODO: Deal with the induced case.
+                _imp->edge_label_compatibility[label1_id][label2_id] = _check_edge_label_compatibility(labels1, labels2);
             }
-            i += 1;
         }
 
     }
