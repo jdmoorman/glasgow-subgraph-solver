@@ -406,8 +406,6 @@ auto solve_homomorphism_problem(
         // but can be adapted to support most of them
         if (1 != params.n_threads)
             throw UnsupportedConfiguration{ "Proof logging cannot yet be used with threads" };
-        if (params.clique_detection)
-            throw UnsupportedConfiguration{ "Proof logging cannot yet be used with clique detection" };
         if (params.lackey)
             throw UnsupportedConfiguration{ "Proof logging cannot yet be used with a lackey" };
         if (! params.pattern_less_constraints.empty())
@@ -467,61 +465,34 @@ auto solve_homomorphism_problem(
         return HomomorphismResult{ };
     }
 
-    // is the pattern a clique? if so, use a clique algorithm instead
-    if (can_use_clique(params) && is_simple_clique(pattern)) {
-        CliqueParams clique_params;
-        clique_params.timeout = params.timeout;
-        clique_params.start_time = params.start_time;
-        clique_params.decide = make_optional(pattern.size());
-        clique_params.restarts_schedule = make_unique<NoRestartsSchedule>();
-        auto clique_result = solve_clique_problem(target, clique_params);
+    // Just solve the problem.
+    HomomorphismModel model(target, pattern, params);
 
-        // now translate the result back into what we expect
+    if (! model.prepare()) {
         HomomorphismResult result;
-        int v = 0;
-        for (auto & m : clique_result.clique) {
-            result.mapping.emplace(v++, m);
-            // the clique solver can find a bigger clique than we ask for
-            if (v >= pattern.size())
-                break;
-        }
-        result.nodes = clique_result.nodes;
-        result.extra_stats = move(clique_result.extra_stats);
-        result.extra_stats.emplace_back("used_clique_solver = true");
-        result.complete = clique_result.complete;
-
+        result.extra_stats.emplace_back("model_consistent = false");
+        result.complete = true;
+        if (params.proof)
+            params.proof->finish_unsat_proof();
         return result;
+    }
+
+    HomomorphismResult result;
+    if (1 == params.n_threads) {
+        SequentialSolver solver(model, params);
+        result = solver.solve();
     }
     else {
-        // just solve the problem
-        HomomorphismModel model(target, pattern, params);
+        if (! params.restarts_schedule->might_restart())
+            throw UnsupportedConfiguration{ "Threaded search requires restarts" };
 
-        if (! model.prepare()) {
-            HomomorphismResult result;
-            result.extra_stats.emplace_back("model_consistent = false");
-            result.complete = true;
-            if (params.proof)
-                params.proof->finish_unsat_proof();
-            return result;
-        }
-
-        HomomorphismResult result;
-        if (1 == params.n_threads) {
-            SequentialSolver solver(model, params);
-            result = solver.solve();
-        }
-        else {
-            if (! params.restarts_schedule->might_restart())
-                throw UnsupportedConfiguration{ "Threaded search requires restarts" };
-
-            unsigned n_threads = how_many_threads(params.n_threads);
-            ThreadedSolver solver(model, params, n_threads);
-            result = solver.solve();
-        }
-
-        if (params.proof && result.complete && result.mapping.empty())
-            params.proof->finish_unsat_proof();
-
-        return result;
+        unsigned n_threads = how_many_threads(params.n_threads);
+        ThreadedSolver solver(model, params, n_threads);
+        result = solver.solve();
     }
+
+    if (params.proof && result.complete && result.mapping.empty())
+        params.proof->finish_unsat_proof();
+
+    return result;
 }
