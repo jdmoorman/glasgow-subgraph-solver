@@ -2,7 +2,6 @@
 
 #include "homomorphism.hh"
 #include "configuration.hh"
-#include "graph_traits.hh"
 #include "homomorphism_domain.hh"
 #include "homomorphism_model.hh"
 #include "homomorphism_searcher.hh"
