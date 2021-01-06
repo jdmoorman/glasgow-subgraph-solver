@@ -26,7 +26,7 @@ class InputGraph
         /**
          * \param initial_size can be 0, if resize() is called afterwards.
          */
-        InputGraph(int initial_size, bool has_vertex_labels, bool has_edge_labels, bool directed, bool loopy);
+        InputGraph(int initial_size, bool has_stored_edges, bool has_vertex_labels, bool has_edge_labels, bool directed, bool loopy);
 
         InputGraph(const InputGraph &) = delete;
 
@@ -78,6 +78,12 @@ class InputGraph
          * What is the degree of a given vertex?
          */
         auto degree(int a) const -> int;
+
+
+        /**
+         * Are the graph edges stored?
+         */
+        auto has_stored_edges() const -> bool;
 
         auto edges() const -> std::map<std::pair<int, int>, std::multiset<std::string> >;
 
