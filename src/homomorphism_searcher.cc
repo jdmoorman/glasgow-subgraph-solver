@@ -386,11 +386,9 @@ auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & 
             // ...then we can only be mapped to adjacent vertices
             d.values &= model.forward_target_graph_row(current_assignment.target_vertex);
         }
-        else {
-            if constexpr (induced_) {
-                // ...otherwise we can only be mapped to adjacent vertices
-                d.values.intersect_with_complement(model.forward_target_graph_row(current_assignment.target_vertex));
-            }
+        else if constexpr (induced_) {
+            // ...otherwise we can only be mapped to adjacent vertices
+            d.values.intersect_with_complement(model.forward_target_graph_row(current_assignment.target_vertex));
         }
 
         const auto & reverse_edge_graph_pairs_to_consider = model.pattern_adjacency_bits(d.v, current_assignment.pattern_vertex);
@@ -399,11 +397,9 @@ auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & 
             // ...then we can only be mapped to adjacent vertices
             d.values &= model.reverse_target_graph_row(current_assignment.target_vertex);
         }
-        else {
-            if constexpr (induced_) {
-                // ...otherwise we can only be mapped to adjacent vertices
-                d.values.intersect_with_complement(model.reverse_target_graph_row(current_assignment.target_vertex));
-            }
+        else if constexpr (induced_) {
+            // ...otherwise we can only be mapped to adjacent vertices
+            d.values.intersect_with_complement(model.reverse_target_graph_row(current_assignment.target_vertex));
         }
     }
 
