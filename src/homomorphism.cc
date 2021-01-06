@@ -1,7 +1,6 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 #include "homomorphism.hh"
-#include "clique.hh"
 #include "configuration.hh"
 #include "graph_traits.hh"
 #include "homomorphism_domain.hh"

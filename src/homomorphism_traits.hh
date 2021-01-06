@@ -21,6 +21,4 @@ auto degree_and_nds_are_exact(const HomomorphismParams & params, unsigned patter
 
 auto global_degree_is_preserved(const HomomorphismParams & params) -> bool;
 
-auto can_use_clique(const HomomorphismParams & params) -> bool;
-
 #endif

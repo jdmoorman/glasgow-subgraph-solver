@@ -72,9 +72,6 @@ struct HomomorphismParams
     /// Trigger restarts using the first thread?
     bool triggered_restarts = false;
 
-    /// Are we allowed to do clique detection?
-    bool clique_detection = true;
-
     /// Use distance 3 filtering?
     bool distance3 = false;
 
