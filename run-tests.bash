@@ -28,7 +28,7 @@ if ! grep '^solution_count = 6$' <(./glasgow_subgraph_solver --count-solutions -
 fi
 
 if ! grep '^solution_count = 474$' <(./glasgow_subgraph_solver --count-solutions --format csv test-instances/c3.csv test-instances/c3c2.csv ) ; then
-    echo "induced cyclic enumerate test failed" 1>&1
+    echo "cyclic enumerate test failed" 1>&1
     exit 1
 fi
 
@@ -39,6 +39,21 @@ fi
 
 if ! grep '^solution_count = 123$' <(./glasgow_subgraph_solver --count-solutions --format csv test-instances/c3_with_labels.csv test-instances/c3c2_with_labels.csv ) ; then
     echo "cyclic enumerate test failed" 1>&1
+    exit 1
+fi
+
+if ! grep '^solution_count = 1$' <(./glasgow_subgraph_solver --count-solutions --format csv test-instances/small_multigraph_pattern.csv test-instances/small_multigraph_world.csv ) ; then
+    echo "simple multigraph test failed" 1>&1
+    exit 1
+fi
+
+if ! grep '^solution_count = 1$' <(./glasgow_subgraph_solver --count-solutions --format csv test-instances/multigraph_single_edge_pattern.csv test-instances/multigraph_single_edge_target.csv ) ; then
+    echo "single edge directed multigraph test failed" 1>&1
+    exit 1
+fi
+
+if ! grep '^solution_count = 0$' <(./glasgow_subgraph_solver --count-solutions --format csv test-instances/multigraph_single_edge_pattern_fails.csv test-instances/multigraph_single_edge_target.csv ) ; then
+    echo "single edge directed multigraph test should have failed, but did not" 1>&1
     exit 1
 fi
 
