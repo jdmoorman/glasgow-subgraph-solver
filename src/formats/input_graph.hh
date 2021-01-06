@@ -55,6 +55,16 @@ class InputGraph
         auto resize(int size) -> void;
 
         /**
+         * Add edges in both directions for each labeled edge.
+         */
+        auto add_edges(std::vector<std::tuple<int, int, std::string>> & edges ) -> void;
+
+        /**
+         * Add edge in both directions.
+         */
+        auto add_edge(int a, int b, std::string label) -> void;
+
+        /**
          * Add a directed edge from a to b, with a label.
          */
         auto add_directed_edge(int a, int b, std::string label) -> void;
@@ -68,6 +78,8 @@ class InputGraph
          * What is the degree of a given vertex?
          */
         auto degree(int a) const -> int;
+
+        auto edges() const -> std::map<std::pair<int, int>, std::multiset<std::string> >;
 
         /**
          * Set a vertex label.

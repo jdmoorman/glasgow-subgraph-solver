@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <vector>
 #include <set>
+#include <iostream>
 
 #include <boost/bimap.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
@@ -27,6 +28,7 @@ using std::string;
 using std::string_view;
 using std::to_string;
 using std::vector;
+using std::tuple;
 using std::multiset;
 
 using Names = boost::bimaps::bimap<boost::bimaps::unordered_set_of<int>, boost::bimaps::unordered_set_of<string> >;
@@ -65,15 +67,24 @@ auto InputGraph::resize(int size) -> void
     _imp->vertex_labels.resize(size);
 }
 
-// TODO: Modify for multigraph.
+auto InputGraph::add_edges(vector<tuple<int, int, string>> & edges ) -> void
+{
+    for (auto & [ a, b, label ] : edges)
+        add_edge(a, b, label);
+}
+
+auto InputGraph::add_edge(int a, int b, string label) -> void
+{
+    add_directed_edge(a, b, label);
+    add_directed_edge(b, a, label);
+}
+
 auto InputGraph::add_directed_edge(int a, int b, string label) -> void
 {
     // Add edge. Append to label vector if edge already exists.
     multiset<string> label_multiset;
-    label_multiset.insert(label);
-    if(!_imp->edges.emplace(make_pair(a, b), label_multiset).second) {
-        _imp->edges.emplace(make_pair(a, b), label_multiset).first->second.insert(label);
-    }
+    auto edge_emplace = _imp->edges.emplace(make_pair(a, b), label_multiset);
+    edge_emplace.first->second.insert(label);
 }
 
 auto InputGraph::loopy() const -> bool
@@ -154,6 +165,11 @@ auto InputGraph::edge_label(int a, int b) const -> multiset<string>
 auto InputGraph::begin_edges() const -> InputGraph::EdgesIterator
 {
     return _imp->edges.begin();
+}
+
+auto InputGraph::edges() const -> map<pair<int, int>, multiset<string> >
+{
+    return _imp->edges;
 }
 
 auto InputGraph::end_edges() const -> InputGraph::EdgesIterator
