@@ -370,7 +370,8 @@ auto main(int argc, char * argv[]) -> int
         if (was_given_automorphism_group)
             cout << "pattern_automorphism_group_size = " << pattern_automorphism_group_size << endl;
 
-        // Defaults to false.
+        // Decomposition defaults to false.
+        // THIS IS THE CALL TO SOLVE
         auto result = options_vars.count("decomposition") ?
             solve_sip_by_decomposition(pattern, target, params) :
             solve_homomorphism_problem(pattern, target, params);
