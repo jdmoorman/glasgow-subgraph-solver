@@ -20,6 +20,7 @@ using std::to_string;
 using std::vector;
 
 
+// TODO: remove calls to this function.
 auto read_file_format(const string & format, const string & filename) -> InputGraph
 {
     ifstream infile{ filename };
