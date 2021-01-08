@@ -3,6 +3,8 @@
 #include "homomorphism_searcher.hh"
 #include "cheap_all_different.hh"
 
+#include <iostream>
+
 using std::max;
 using std::move;
 using std::mt19937;
@@ -14,7 +16,7 @@ using std::to_string;
 using std::uniform_int_distribution;
 using std::vector;
 
-HomomorphismSearcher::HomomorphismSearcher(const HomomorphismModel & m, const HomomorphismParams & p,
+HomomorphismSearcher::HomomorphismSearcher(const BaseHomomorphismModel & m, const HomomorphismParams & p,
         const DuplicateSolutionFilterer & d) :
     model(m),
     params(p),
@@ -365,22 +367,22 @@ auto HomomorphismSearcher::find_branch_domain(const Domains & domains) -> const 
 template <bool directed_, bool has_edge_labels_, bool induced_>
 auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & d, const HomomorphismAssignment & current_assignment) -> void
 {
+    // Neighbors of the assigned pattern vertex.
     const auto & graph_pairs_to_consider = model.pattern_adjacency_bits(current_assignment.pattern_vertex, d.v);
+
 
     if constexpr (! directed_) {
         // for the original graph pair, if we're adjacent...
         if (graph_pairs_to_consider & (1u << 0)) {
-            // ...then we can only be mapped to adjacent vertices
+            // ...candidates for neighbors of the pattern vertex must be neighbors of the target vertex.
             d.values &= model.target_graph_row(0, current_assignment.target_vertex);
         }
-        else {
-            if constexpr (induced_) {
-                // ...otherwise we can only be mapped to adjacent vertices
-                d.values.intersect_with_complement(model.target_graph_row(0, current_assignment.target_vertex));
-            }
+        else if constexpr (induced_) {
+            // ...the above and candidates for non neighbors must be non neighbors.
+            d.values.intersect_with_complement(model.target_graph_row(0, current_assignment.target_vertex));
         }
     }
-    else {
+    else { // Directed graph.
         // both forward and reverse edges to consider
         if (graph_pairs_to_consider & (1u << 0)) {
             // ...then we can only be mapped to adjacent vertices
@@ -415,20 +417,23 @@ auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & 
     if constexpr (has_edge_labels_) {
         // if we're adjacent in the original graph, additionally the edge labels need to match up
         if (graph_pairs_to_consider & (1u << 0)) {
+
             auto check_d_values = d.values;
 
-            auto want_forward_label = model.pattern_edge_label(current_assignment.pattern_vertex, d.v);
+            int forward_label = model.pattern_edge_label(current_assignment.pattern_vertex, d.v);
             for (auto c = check_d_values.find_first() ; c != decltype(check_d_values)::npos ; c = check_d_values.find_first()) {
                 check_d_values.reset(c);
 
-                //TODO: add for loop over channels for current_assignment.pattern_vertex, d.v
-                //      reset c only if there are no matching channels?
-                //      alternativey change check_d_values to incorporate channel/label
+                // Check compatibility
+                // TODO:FILL
+                // if (!model.edge_label_compatibility(forward_label, current_assignment.target_vertex, c)) {
+                //     d.values.reset(c);
+                // }
 
-                auto got_forward_label = model.target_edge_label(current_assignment.target_vertex, c);
-                // TODO: Need to change this compatibility function.
-                if (got_forward_label != want_forward_label)
-                    d.values.reset(c);
+                // int got_forward_label = model.target_edge_label(current_assignment.target_vertex, c);
+                // if (!model.edge_label_compatibility(want_forward_label, got_forward_label)){
+                //     d.values.reset(c);
+                // }
             }
         }
 
@@ -436,13 +441,21 @@ auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & 
         if (reverse_edge_graph_pairs_to_consider & (1u << 0)) {
             auto check_d_values = d.values;
 
-            auto want_reverse_label = model.pattern_edge_label(d.v, current_assignment.pattern_vertex);
+            auto reverse_label = model.pattern_edge_label(d.v, current_assignment.pattern_vertex);
             for (auto c = check_d_values.find_first() ; c != decltype(check_d_values)::npos ; c = check_d_values.find_first()) {
                 check_d_values.reset(c);
 
-                auto got_reverse_label = model.target_edge_label(c, current_assignment.target_vertex);
-                if (got_reverse_label != want_reverse_label)
-                    d.values.reset(c);
+
+                // Check compatibility
+                // TODO:FILL
+                // if (!model.edge_label_compatibility(reverse_label, c, current_assignment.target_vertex)){
+                //     d.values.reset(c);
+                // }
+
+                // int got_reverse_label = model.target_edge_label(c, current_assignment.target_vertex);
+                // if (!model.edge_label_compatibility(want_reverse_label, got_reverse_label)){
+                //     d.values.reset(c);
+                // }
             }
         }
     }
@@ -616,17 +629,20 @@ auto HomomorphismSearcher::propagate(Domains & new_domains, HomomorphismAssignme
                         });
 
         // propagate simple all different and adjacency
-        if (! propagate_simple_constraints(new_domains, current_assignment))
+        if (! propagate_simple_constraints(new_domains, current_assignment)){
             return false;
+        }
 
         // propagate less than
-        if (model.has_less_thans() && ! propagate_less_thans(new_domains))
+        if (model.has_less_thans() && ! propagate_less_thans(new_domains)){
             return false;
+        }
 
         // propagate all different
         if (params.injectivity == Injectivity::Injective)
-            if (! cheap_all_different(model.target_size, new_domains, params.proof))
+            if (! cheap_all_different(model.target_size, new_domains, params.proof)){
                 return false;
+            }
     }
 
     int dcount = 0;
@@ -635,8 +651,9 @@ auto HomomorphismSearcher::propagate(Domains & new_domains, HomomorphismAssignme
         expand_to_full_result(assignments, mapping);
 
         if (! propagate_using_lackey) {
-            if (! params.lackey->check_solution(mapping, true, false, Lackey::DeletionFunction{}))
+            if (! params.lackey->check_solution(mapping, true, false, Lackey::DeletionFunction{})){
                 return false;
+            }
         }
         else {
             bool wipeout = false;
@@ -659,8 +676,9 @@ auto HomomorphismSearcher::propagate(Domains & new_domains, HomomorphismAssignme
                 return false;
             };
 
-            if (! params.lackey->check_solution(mapping, true, false, deletion) || wipeout)
+            if (! params.lackey->check_solution(mapping, true, false, deletion) || wipeout){
                 return false;
+            }
         }
     }
 
