@@ -79,12 +79,6 @@ class InputGraph
          */
         auto degree(int a) const -> int;
 
-
-        /**
-         * Are the graph edges stored?
-         */
-        auto has_stored_edges() const -> bool;
-
         auto edges() const -> std::map<std::pair<int, int>, std::multiset<std::string> >;
 
         /**

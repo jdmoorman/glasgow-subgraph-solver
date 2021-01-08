@@ -36,7 +36,7 @@ using Names = boost::bimaps::bimap<boost::bimaps::unordered_set_of<int>, boost::
 struct InputGraph::Imp
 {
     int size = 0;
-    bool has_stored_edges, has_vertex_labels, has_edge_labels;
+    bool has_vertex_labels, has_edge_labels;
     // TODO: Will need to change this edge map for multigraph.
     map<pair<int, int>, multiset<string> > edges;
     vector<string> vertex_labels;
@@ -44,11 +44,10 @@ struct InputGraph::Imp
     bool loopy = false, directed = false;
 };
 
-InputGraph::InputGraph(int size, bool has_stored_edges, bool has_vertex_labels, bool has_edge_labels,
+InputGraph::InputGraph(int size, bool has_vertex_labels, bool has_edge_labels,
     bool directed, bool loopy) :
     _imp(new Imp{ })
 {
-    _imp->has_stored_edges = has_stored_edges;
     _imp->has_vertex_labels = has_vertex_labels;
     _imp->has_edge_labels = has_edge_labels;
     _imp->directed = directed;
@@ -181,11 +180,6 @@ auto InputGraph::end_edges() const -> InputGraph::EdgesIterator
 auto InputGraph::has_vertex_labels() const -> bool
 {
     return _imp->has_vertex_labels;
-}
-
-auto InputGraph::has_stored_edges() const -> bool
-{
-    return _imp->has_stored_edges;
 }
 
 auto InputGraph::has_edge_labels() const -> bool
