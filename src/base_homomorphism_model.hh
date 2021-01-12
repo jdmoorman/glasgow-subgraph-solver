@@ -110,7 +110,6 @@ class BaseHomomorphismModel
         auto pattern_vertex_label(int p) const -> int;
         auto target_vertex_label(int p) const -> int;
         auto pattern_edge_label(int p, int q) const -> int;
-        auto target_edge_label(int t, int u) const -> int;
         auto check_edge_label_compatibility(const std::multiset<std::string>&, const std::multiset<std::string>&) const -> bool;
 
         auto pattern_has_loop(int p) const -> bool;

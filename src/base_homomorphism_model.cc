@@ -72,6 +72,14 @@ BaseHomomorphismModel::BaseHomomorphismModel(const InputGraph & target, const In
         }
     }
 
+
+    // Map each unique edge_label to an integer.
+    map<multiset<string>, int> pattern_edge_labels_map;
+    // Resize vector recording integers corresponding to each edge's label.
+    _imp->pattern_edge_labels.resize(pattern_size * pattern_size);
+    // Fill edge_labels_map labels -> int and edge_labels with labels.
+    _record_edge_labels(pattern_edge_labels_map, pattern, _imp->pattern_edge_labels);
+
     // re-encode and store pattern labels
     // TODO: condense repeated code.
     map<string, int> vertex_labels_map;
@@ -757,16 +765,6 @@ auto BaseHomomorphismModel::pattern_edge_label(int p, int q) const -> int
 {
     return _imp->pattern_edge_labels[p * pattern_size + q];
 }
-
-auto BaseHomomorphismModel::target_edge_label(int t, int u) const -> int
-{
-    return _imp->target_edge_labels[t * target_size + u];
-}
-
-// auto BaseHomomorphismModel::edge_label_compatibility(int p_lid, int t_lid) const -> bool
-// {
-//     return _imp->edge_label_compatibility[p_lid][t_lid];
-// }
 
 auto BaseHomomorphismModel::pattern_has_loop(int p) const -> bool
 {
