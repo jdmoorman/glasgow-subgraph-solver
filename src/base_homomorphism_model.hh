@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
-#ifndef GLASGOW_SUBGRAPH_SOLVER_GUARD_SRC_HOMOMORPHISM_MODEL_HH
-#define GLASGOW_SUBGRAPH_SOLVER_GUARD_SRC_HOMOMORPHISM_MODEL_HH 1
+#ifndef GLASGOW_SUBGRAPH_SOLVER_GUARD_SRC_BASE_HOMOMORPHISM_MODEL_HH
+#define GLASGOW_SUBGRAPH_SOLVER_GUARD_SRC_BASE_HOMOMORPHISM_MODEL_HH 1
 
 #include "formats/input_graph.hh"
 #include "svo_bitset.hh"
@@ -12,11 +12,45 @@
 #include <memory>
 #include <set>
 
+
+#include <functional>
+#include <list>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
 class BaseHomomorphismModel
 {
+    using PatternAdjacencyBitsType = uint8_t;
     // TODO: Check to see which of these should be private.
     protected:
-        struct Imp;
+        struct Imp
+        {
+            const HomomorphismParams & params;
+
+            std::vector<PatternAdjacencyBitsType> pattern_adjacencies_bits;
+            std::vector<SVOBitset> pattern_graph_rows;
+            std::vector<SVOBitset> target_graph_rows, forward_target_graph_rows, reverse_target_graph_rows;
+
+            std::vector<std::vector<int> > patterns_degrees, targets_degrees;
+            int largest_target_degree = 0;
+            // TODO: Change has_less_thans variable name.
+            bool has_less_thans = false, directed = false;
+
+            std::vector<int> pattern_vertex_labels, target_vertex_labels, pattern_edge_labels, target_edge_labels;
+            // TODO: Discuss whether this is better as a vector or a map.
+            // The map below is essentially a copy of InputGraph.edges. Should we just modify that directly?
+            // map<pair<int,int>, int> pattern_edge_labels, target_edge_labels;
+            std::vector<int> pattern_loops, target_loops;
+
+            std::vector<std::string> pattern_vertex_proof_names, target_vertex_proof_names;
+
+            Imp(const HomomorphismParams & p) :
+                params(p)
+            {
+            }
+        };
         std::unique_ptr<Imp> _imp;
 
         auto _build_exact_path_graphs(std::vector<SVOBitset> & graph_rows, unsigned size, unsigned & idx,
@@ -44,7 +78,6 @@ class BaseHomomorphismModel
         auto _record_edge_labels(std::map<std::multiset<std::string>, int>& label_map, const InputGraph & graph, std::vector<int>& graph_edge_labels) -> void;
 
     public:
-        using PatternAdjacencyBitsType = uint8_t;
 
         const unsigned max_graphs;
         unsigned pattern_size, target_size;

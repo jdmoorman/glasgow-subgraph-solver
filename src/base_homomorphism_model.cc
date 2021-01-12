@@ -36,33 +36,6 @@ namespace
     }
 }
 
-struct BaseHomomorphismModel::Imp
-{
-    const HomomorphismParams & params;
-
-    vector<PatternAdjacencyBitsType> pattern_adjacencies_bits;
-    vector<SVOBitset> pattern_graph_rows;
-    vector<SVOBitset> target_graph_rows, forward_target_graph_rows, reverse_target_graph_rows;
-
-    vector<vector<int> > patterns_degrees, targets_degrees;
-    int largest_target_degree = 0;
-    // TODO: Change has_less_thans variable name.
-    bool has_less_thans = false, directed = false;
-
-    vector<int> pattern_vertex_labels, target_vertex_labels, pattern_edge_labels, target_edge_labels;
-    // TODO: Discuss whether this is better as a vector or a map.
-    // The map below is essentially a copy of InputGraph.edges. Should we just modify that directly?
-    // map<pair<int,int>, int> pattern_edge_labels, target_edge_labels;
-    vector<int> pattern_loops, target_loops;
-
-    vector<string> pattern_vertex_proof_names, target_vertex_proof_names;
-
-    Imp(const HomomorphismParams & p) :
-        params(p)
-    {
-    }
-};
-
 BaseHomomorphismModel::BaseHomomorphismModel(const InputGraph & target, const InputGraph & pattern, const HomomorphismParams & params) :
     _imp(new Imp(params)),
     max_graphs(calculate_n_shape_graphs(params)),
