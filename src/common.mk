@@ -2,6 +2,7 @@ TARGET := libcommon.a
 
 SOURCES := \
 	base_homomorphism_model.cc \
+	crossword_homomorphism_model.cc \
     formats/csv.cc \
     formats/graph_file_error.cc \
     formats/input_graph.cc \
@@ -10,6 +11,7 @@ SOURCES := \
     configuration.cc \
     homomorphism.cc \
     homomorphism_domain.cc \
+    homomorphism_model.cc \
     homomorphism_searcher.cc \
     homomorphism_traits.cc \
     lackey.cc \
@@ -22,4 +24,3 @@ SOURCES := \
     timeout.cc \
     verify.cc \
     watches.cc \
-    homomorphism_model.cc \
