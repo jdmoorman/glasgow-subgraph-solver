@@ -42,6 +42,9 @@ class BaseHomomorphismModel
             // TODO: Discuss whether this is better as a vector or a map.
             // The map below is essentially a copy of InputGraph.edges. Should we just modify that directly?
             // map<pair<int,int>, int> pattern_edge_labels, target_edge_labels;
+
+            std::map<std::multiset<std::string>, int> pattern_edge_labels_map, target_edge_labels_map;
+
             std::vector<int> pattern_loops, target_loops;
 
             std::vector<std::string> pattern_vertex_proof_names, target_vertex_proof_names;

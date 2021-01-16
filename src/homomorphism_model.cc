@@ -32,24 +32,17 @@ using std::multiset;
 HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph & pattern, const HomomorphismParams & params) :
     BaseHomomorphismModel(target, pattern, params)
 {
-    // Map each unique edge_label to an integer.
-    map<multiset<string>, int> pattern_edge_labels_map, target_edge_labels_map;
     // Resize vector recording integers corresponding to each edge's label.
-    _imp->pattern_edge_labels.resize(pattern_size * pattern_size);
     _imp->target_edge_labels.resize(target_size * target_size);
 
     // Fill edge_labels_map labels -> int and edge_labels with labels.
-    _record_edge_labels(pattern_edge_labels_map, pattern, _imp->pattern_edge_labels);
-
-    // Record only the edges whose labels occur in the pattern graph.
-    // TODO: Implement.
-    _record_edge_labels(target_edge_labels_map, target, _imp->target_edge_labels);
+    _record_edge_labels(_imp->target_edge_labels_map, target, _imp->target_edge_labels);
 
     // // TODO: Find better way to get indices.
     // Form edge compatibility matrix.
-    edge_label_compatibility.resize(pattern_edge_labels_map.size(), vector<bool>(target_edge_labels_map.size()));
-    for (const auto& [labels1, label1_id] : pattern_edge_labels_map) {
-        for (const auto& [labels2, label2_id] : target_edge_labels_map) {
+    edge_label_compatibility.resize(_imp->pattern_edge_labels_map.size(), vector<bool>(_imp->target_edge_labels_map.size()));
+    for (const auto& [labels1, label1_id] : _imp->pattern_edge_labels_map) {
+        for (const auto& [labels2, label2_id] : _imp->target_edge_labels_map) {
             // TODO: Deal with the induced case.
             edge_label_compatibility[label1_id][label2_id] = check_edge_label_compatibility(labels1, labels2);
         }

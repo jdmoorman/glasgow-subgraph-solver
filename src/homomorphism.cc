@@ -4,6 +4,7 @@
 #include "configuration.hh"
 #include "homomorphism_domain.hh"
 #include "base_homomorphism_model.hh"
+#include "homomorphism_model.hh"
 #include "homomorphism_searcher.hh"
 #include "homomorphism_traits.hh"
 #include "thread_utils.hh"
@@ -464,7 +465,7 @@ auto solve_homomorphism_problem(
     }
 
     // Just solve the problem.
-    BaseHomomorphismModel model(target, pattern, params);
+    HomomorphismModel model(target, pattern, params);
 
     if (! model.prepare()) {
         HomomorphismResult result;

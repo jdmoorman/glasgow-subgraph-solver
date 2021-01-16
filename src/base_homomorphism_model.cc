@@ -42,6 +42,7 @@ BaseHomomorphismModel::BaseHomomorphismModel(const InputGraph & target, const In
     pattern_size(pattern.size()),
     target_size(target.size())
 {
+    _imp->directed = pattern.directed();
     _imp->patterns_degrees.resize(max_graphs);
     _imp->targets_degrees.resize(max_graphs);
 
@@ -54,10 +55,6 @@ BaseHomomorphismModel::BaseHomomorphismModel(const InputGraph & target, const In
         for (int v = 0 ; v < target.size() ; ++v)
             _imp->target_vertex_proof_names.push_back(target.vertex_name(v));
     }
-
-    if (pattern.directed())
-        _imp->directed = true;
-
     // recode pattern to a bit graph, and strip out loops
     _imp->pattern_graph_rows.resize(pattern_size * max_graphs, SVOBitset(pattern_size, 0));
     _imp->pattern_loops.resize(pattern_size);
@@ -74,11 +71,10 @@ BaseHomomorphismModel::BaseHomomorphismModel(const InputGraph & target, const In
 
 
     // Map each unique edge_label to an integer.
-    map<multiset<string>, int> pattern_edge_labels_map;
     // Resize vector recording integers corresponding to each edge's label.
     _imp->pattern_edge_labels.resize(pattern_size * pattern_size);
     // Fill edge_labels_map labels -> int and edge_labels with labels.
-    _record_edge_labels(pattern_edge_labels_map, pattern, _imp->pattern_edge_labels);
+    _record_edge_labels(_imp->pattern_edge_labels_map, pattern, _imp->pattern_edge_labels);
 
     // re-encode and store pattern labels
     // TODO: condense repeated code.
