@@ -4,6 +4,7 @@
 #define GLASGOW_SUBGRAPH_SOLVER_GUARD_SRC_CROSSWORD_HOMOMORPHISM_MODEL_HH 1
 
 #include "base_homomorphism_model.hh"
+#include "formats/input_graph.hh"
 
 #include <map>
 #include <string>
