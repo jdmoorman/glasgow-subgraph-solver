@@ -16,7 +16,7 @@ using std::to_string;
 using std::uniform_int_distribution;
 using std::vector;
 
-HomomorphismSearcher::HomomorphismSearcher(const BaseHomomorphismModel & m, const HomomorphismParams & p,
+HomomorphismSearcher::HomomorphismSearcher(const CrosswordHomomorphismModel & m, const HomomorphismParams & p,
         const DuplicateSolutionFilterer & d) :
     model(m),
     params(p),
@@ -420,20 +420,14 @@ auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & 
 
             auto check_d_values = d.values;
 
-            int forward_label = model.pattern_edge_label(current_assignment.pattern_vertex, d.v);
+            int pattern_edge_lid = model.pattern_edge_label(current_assignment.pattern_vertex, d.v);
             for (auto c = check_d_values.find_first() ; c != decltype(check_d_values)::npos ; c = check_d_values.find_first()) {
                 check_d_values.reset(c);
 
                 // Check compatibility
-                // TODO:FILL
-                // if (!model.edge_label_compatibility(forward_label, current_assignment.target_vertex, c)) {
-                //     d.values.reset(c);
-                // }
-
-                // int got_forward_label = model.target_edge_label(current_assignment.target_vertex, c);
-                // if (!model.edge_label_compatibility(want_forward_label, got_forward_label)){
-                //     d.values.reset(c);
-                // }
+                if (!model.check_edge_label_compatibility(current_assignment.target_vertex, c, pattern_edge_lid)) {
+                    d.values.reset(c);
+                }
             }
         }
 
@@ -441,21 +435,14 @@ auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & 
         if (reverse_edge_graph_pairs_to_consider & (1u << 0)) {
             auto check_d_values = d.values;
 
-            auto reverse_label = model.pattern_edge_label(d.v, current_assignment.pattern_vertex);
+            auto reverse_pattern_edge_lid = model.pattern_edge_label(d.v, current_assignment.pattern_vertex);
             for (auto c = check_d_values.find_first() ; c != decltype(check_d_values)::npos ; c = check_d_values.find_first()) {
                 check_d_values.reset(c);
 
-
                 // Check compatibility
-                // TODO:FILL
-                // if (!model.edge_label_compatibility(reverse_label, c, current_assignment.target_vertex)){
-                //     d.values.reset(c);
-                // }
-
-                // int got_reverse_label = model.target_edge_label(c, current_assignment.target_vertex);
-                // if (!model.edge_label_compatibility(want_reverse_label, got_reverse_label)){
-                //     d.values.reset(c);
-                // }
+                if (!model.check_edge_label_compatibility(c, current_assignment.target_vertex, reverse_pattern_edge_lid)){
+                    d.values.reset(c);
+                }
             }
         }
     }
