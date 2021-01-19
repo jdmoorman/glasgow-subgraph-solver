@@ -33,18 +33,22 @@ namespace
 
         while (getline(infile, line)) {
             auto pos = line.find_first_of(",>");
-            if (string::npos == pos)
-                throw GraphFileError{ filename, "expected a comma but didn't get one", true };
+            string left = line.substr(0, pos);
+            string right, label;
+            char delim; // Whether directed edge.
+            if (string::npos != pos){
 
-            string left = line.substr(0, pos), right = line.substr(pos + 1);
-            char delim = line.at(pos);
+                // throw GraphFileError{ filename, "expected a comma but didn't get one", true };
 
-            // Extract edge label if present.
-            string label;
-            auto pos2 = right.find(',');
-            if (string::npos != pos2) {
-                label = right.substr(pos2 + 1);
-                right = right.substr(0, pos2);
+                right = line.substr(pos + 1);
+                delim = line.at(pos);
+
+                // Extract edge label if present.
+                auto pos2 = right.find(',');
+                if (string::npos != pos2) {
+                    label = right.substr(pos2 + 1);
+                    right = right.substr(0, pos2);
+                }
             }
 
             // Row describes a vertex. Add vertex to vertices.
