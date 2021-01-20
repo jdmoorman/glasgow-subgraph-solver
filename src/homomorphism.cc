@@ -398,67 +398,67 @@ auto solve_homomorphism_problem(
         const InputGraph & target,
         const HomomorphismParams & params) -> HomomorphismResult
 {
-    // start by setting up proof logging, if necessary
-    if (params.proof) {
-        // proof logging is currently incompatible with a whole load of "extra" features,
-        // but can be adapted to support most of them
-        if (1 != params.n_threads)
-            throw UnsupportedConfiguration{ "Proof logging cannot yet be used with threads" };
-        if (params.lackey)
-            throw UnsupportedConfiguration{ "Proof logging cannot yet be used with a lackey" };
-        if (! params.pattern_less_constraints.empty())
-            throw UnsupportedConfiguration{ "Proof logging cannot yet be used with less-constraints" };
-        if (params.injectivity != Injectivity::Injective)
-            throw UnsupportedConfiguration{ "Proof logging can currently only be used with injectivity" };
-        if (params.induced)
-            throw UnsupportedConfiguration{ "Proof logging cannot yet be used for induced problems" };
-        if (pattern.has_vertex_labels() || pattern.has_edge_labels())
-            throw UnsupportedConfiguration{ "Proof logging cannot yet be used on labelled graphs" };
-
-        // set up our model file, with a set of OPB variables for each CP variable
-        for (int n = 0 ; n < pattern.size() ; ++n) {
-            params.proof->create_cp_variable(n, target.size(),
-                    [&] (int v) { return pattern.vertex_name(v); },
-                    [&] (int v) { return target.vertex_name(v); });
-        }
-
-        // generate constraints for injectivity
-        params.proof->create_injectivity_constraints(pattern.size(), target.size());
-
-        // generate edge constraints, and also handle loops here
-        for (int p = 0 ; p < pattern.size() ; ++p) {
-            for (int t = 0 ; t < target.size() ; ++t) {
-                if (pattern.adjacent(p, p) && ! target.adjacent(t, t))
-                    params.proof->create_forbidden_assignment_constraint(p, t);
-
-                // it's simpler to always have the adjacency constraints, even
-                // if the assignment is forbidden
-                params.proof->start_adjacency_constraints_for(p, t);
-
-                // if p can be mapped to t, then each neighbour of p...
-                for (int q = 0 ; q < pattern.size() ; ++q)
-                    if (q != p && pattern.adjacent(p, q)) {
-                        // ... must be mapped to a neighbour of t
-                        vector<int> permitted;
-                        for (int u = 0 ; u < target.size() ; ++u)
-                            if (t != u && target.adjacent(t, u))
-                                permitted.push_back(u);
-                        params.proof->create_adjacency_constraint(p, q, t, permitted);
-                    }
-            }
-        }
-
-        // output the model file
-        params.proof->finalise_model();
-    }
+    // // start by setting up proof logging, if necessary
+    // if (params.proof) {
+    //     // proof logging is currently incompatible with a whole load of "extra" features,
+    //     // but can be adapted to support most of them
+    //     if (1 != params.n_threads)
+    //         throw UnsupportedConfiguration{ "Proof logging cannot yet be used with threads" };
+    //     if (params.lackey)
+    //         throw UnsupportedConfiguration{ "Proof logging cannot yet be used with a lackey" };
+    //     if (! params.pattern_less_constraints.empty())
+    //         throw UnsupportedConfiguration{ "Proof logging cannot yet be used with less-constraints" };
+    //     if (params.injectivity != Injectivity::Injective)
+    //         throw UnsupportedConfiguration{ "Proof logging can currently only be used with injectivity" };
+    //     if (params.induced)
+    //         throw UnsupportedConfiguration{ "Proof logging cannot yet be used for induced problems" };
+    //     if (pattern.has_vertex_labels() || pattern.has_edge_labels())
+    //         throw UnsupportedConfiguration{ "Proof logging cannot yet be used on labelled graphs" };
+    //
+    //     // set up our model file, with a set of OPB variables for each CP variable
+    //     for (int n = 0 ; n < pattern.size() ; ++n) {
+    //         params.proof->create_cp_variable(n, target.size(),
+    //                 [&] (int v) { return pattern.vertex_name(v); },
+    //                 [&] (int v) { return target.vertex_name(v); });
+    //     }
+    //
+    //     // generate constraints for injectivity
+    //     params.proof->create_injectivity_constraints(pattern.size(), target.size());
+    //
+    //     // generate edge constraints, and also handle loops here
+    //     for (int p = 0 ; p < pattern.size() ; ++p) {
+    //         for (int t = 0 ; t < target.size() ; ++t) {
+    //             if (pattern.adjacent(p, p) && ! target.adjacent(t, t))
+    //                 params.proof->create_forbidden_assignment_constraint(p, t);
+    //
+    //             // it's simpler to always have the adjacency constraints, even
+    //             // if the assignment is forbidden
+    //             params.proof->start_adjacency_constraints_for(p, t);
+    //
+    //             // if p can be mapped to t, then each neighbour of p...
+    //             for (int q = 0 ; q < pattern.size() ; ++q)
+    //                 if (q != p && pattern.adjacent(p, q)) {
+    //                     // ... must be mapped to a neighbour of t
+    //                     vector<int> permitted;
+    //                     for (int u = 0 ; u < target.size() ; ++u)
+    //                         if (t != u && target.adjacent(t, u))
+    //                             permitted.push_back(u);
+    //                     params.proof->create_adjacency_constraint(p, q, t, permitted);
+    //                 }
+    //         }
+    //     }
+    //
+    //     // output the model file
+    //     params.proof->finalise_model();
+    // }
 
     // first sanity check: if we're finding an injective mapping, and there
     // aren't enough vertices, fail immediately.
     if (is_nonshrinking(params) && (pattern.size() > target.size())) {
-        if (params.proof) {
-            params.proof->failure_due_to_pattern_bigger_than_target();
-            params.proof->finish_unsat_proof();
-        }
+        // if (params.proof) {
+        //     params.proof->failure_due_to_pattern_bigger_than_target();
+        //     params.proof->finish_unsat_proof();
+        // }
 
         return HomomorphismResult{ };
     }
@@ -470,8 +470,8 @@ auto solve_homomorphism_problem(
         HomomorphismResult result;
         result.extra_stats.emplace_back("model_consistent = false");
         result.complete = true;
-        if (params.proof)
-            params.proof->finish_unsat_proof();
+        // if (params.proof)
+        //     params.proof->finish_unsat_proof();
         return result;
     }
 
@@ -489,8 +489,8 @@ auto solve_homomorphism_problem(
         result = solver.solve();
     }
 
-    if (params.proof && result.complete && result.mapping.empty())
-        params.proof->finish_unsat_proof();
+    // if (params.proof && result.complete && result.mapping.empty())
+    //     params.proof->finish_unsat_proof();
 
     return result;
 }

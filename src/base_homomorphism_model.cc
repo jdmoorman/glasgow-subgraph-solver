@@ -49,12 +49,13 @@ BaseHomomorphismModel::BaseHomomorphismModel(const InputGraph & target, const In
     if (max_graphs > 8 * sizeof(PatternAdjacencyBitsType))
         throw UnsupportedConfiguration{ "Supplemental graphs won't fit in the chosen bitset size" };
 
-    if (_imp->params.proof) {
-        for (int v = 0 ; v < pattern.size() ; ++v)
-            _imp->pattern_vertex_proof_names.push_back(pattern.vertex_name(v));
-        for (int v = 0 ; v < target.size() ; ++v)
-            _imp->target_vertex_proof_names.push_back(target.vertex_name(v));
-    }
+    // if (_imp->params.proof) {
+    //     for (int v = 0 ; v < pattern.size() ; ++v)
+    //         _imp->pattern_vertex_proof_names.push_back(pattern.vertex_name(v));
+    //     for (int v = 0 ; v < target.size() ; ++v)
+    //         _imp->target_vertex_proof_names.push_back(target.vertex_name(v));
+    // }
+
     // recode pattern to a bit graph, and strip out loops
     _imp->pattern_graph_rows.resize(pattern_size * max_graphs, SVOBitset(pattern_size, 0));
     _imp->pattern_loops.resize(pattern_size);
@@ -72,6 +73,7 @@ BaseHomomorphismModel::BaseHomomorphismModel(const InputGraph & target, const In
 
     // Map each unique edge_label to an integer.
     // Resize vector recording integers corresponding to each edge's label.
+    //TODO: move line below into function?
     _imp->pattern_edge_labels.resize(pattern_size * pattern_size);
     // Fill edge_labels_map labels -> int and edge_labels with labels.
     _record_edge_labels(_imp->pattern_edge_labels_map, pattern, _imp->pattern_edge_labels);
@@ -218,25 +220,6 @@ auto BaseHomomorphismModel::_check_degree_compatibility(
 
     for (unsigned g = 0 ; g < graphs_to_consider ; ++g) {
         if (target_degree(g, t) < pattern_degree(g, p)) {
-            // not ok, degrees differ
-            if (_imp->params.proof) {
-                // get the actual neighbours of p and t, in their original terms
-                vector<int> n_p, n_t;
-
-                auto np = pattern_graph_row(g, p);
-                for (unsigned j = 0 ; j < pattern_size ; ++j)
-                    if (np.test(j))
-                        n_p.push_back(j);
-
-                auto nt = target_graph_row(g, t);
-                for (auto j = nt.find_first() ; j != decltype(nt)::npos ; j = nt.find_first()) {
-                    nt.reset(j);
-                    n_t.push_back(j);
-                }
-
-                _imp->params.proof->incompatible_by_degrees(g, pattern_vertex_for_proof(p), n_p,
-                        target_vertex_for_proof(t), n_t);
-            }
             return false;
         }
         else if (degree_and_nds_are_exact(_imp->params, pattern_size, target_size)
@@ -264,39 +247,6 @@ auto BaseHomomorphismModel::_check_degree_compatibility(
     for (unsigned g = 0 ; g < graphs_to_consider ; ++g) {
         for (unsigned x = 0 ; x < patterns_ndss.at(g).at(p).size() ; ++x) {
             if (targets_ndss.at(g).at(t)->at(x) < patterns_ndss.at(g).at(p).at(x)) {
-                if (_imp->params.proof) {
-                    vector<int> p_subsequence, t_subsequence, t_remaining;
-
-                    // need to know the NDS together with the actual vertices
-                    vector<pair<int, int> > p_nds, t_nds;
-
-                    auto np = pattern_graph_row(g, p);
-                    for (auto w = np.find_first() ; w != decltype(np)::npos ; w = np.find_first()) {
-                        np.reset(w);
-                        p_nds.emplace_back(w, pattern_graph_row(g, w).count());
-                    }
-
-                    auto nt = target_graph_row(g, t);
-                    for (auto w = nt.find_first() ; w != decltype(nt)::npos ; w = nt.find_first()) {
-                        nt.reset(w);
-                        t_nds.emplace_back(w, target_graph_row(g, w).count());
-                    }
-
-                    sort(p_nds.begin(), p_nds.end(), [] (const pair<int, int> & a, const pair<int, int> & b) {
-                            return a.second > b.second; });
-                    sort(t_nds.begin(), t_nds.end(), [] (const pair<int, int> & a, const pair<int, int> & b) {
-                            return a.second > b.second; });
-
-                    for (unsigned y = 0 ; y <= x ; ++y) {
-                        p_subsequence.push_back(p_nds[y].first);
-                        t_subsequence.push_back(t_nds[y].first);
-                    }
-                    for (unsigned y = x + 1 ; y < t_nds.size() ; ++y)
-                        t_remaining.push_back(t_nds[y].first);
-
-                    _imp->params.proof->incompatible_by_nds(g, pattern_vertex_for_proof(p),
-                            target_vertex_for_proof(t), p_subsequence, t_subsequence, t_remaining);
-                }
                 return false;
             }
             else if (degree_and_nds_are_exact(_imp->params, pattern_size, target_size)
@@ -357,20 +307,6 @@ auto BaseHomomorphismModel::initialise_domains(vector<HomomorphismDomain> & doma
             return false;
     }
 
-    // for proof logging, we need degree information before we can output nds proofs
-    if (_imp->params.proof && degree_and_nds_are_preserved(_imp->params) && ! _imp->params.no_nds) {
-        for (unsigned i = 0 ; i < pattern_size ; ++i) {
-            for (unsigned j = 0 ; j < target_size ; ++j) {
-                if (domains.at(i).values.test(j) &&
-                        ! _check_degree_compatibility(i, j, graphs_to_consider, patterns_ndss, targets_ndss, false)) {
-                    domains.at(i).values.reset(j);
-                    if (0 == --domains.at(i).count)
-                        return false;
-                }
-            }
-        }
-    }
-
     // quick sanity check that we have enough values
     if (is_nonshrinking(_imp->params)) {
         SVOBitset domains_union{ target_size, 0 };
@@ -379,27 +315,12 @@ auto BaseHomomorphismModel::initialise_domains(vector<HomomorphismDomain> & doma
 
         unsigned domains_union_popcount = domains_union.count();
         if (domains_union_popcount < unsigned(pattern_size)) {
-            if (_imp->params.proof) {
-                vector<int> hall_lhs, hall_rhs;
-                for (auto & d : domains)
-                    hall_lhs.push_back(d.v);
-                auto dd = domains_union;
-                for (auto v = dd.find_first() ; v != decltype(dd)::npos ; v = dd.find_first()) {
-                    dd.reset(v);
-                    hall_rhs.push_back(v);
-                }
-                _imp->params.proof->emit_hall_set_or_violator(hall_lhs, hall_rhs);
-            }
             return false;
         }
     }
 
     for (auto & d : domains) {
         d.count = d.values.count();
-        if (0 == d.count && _imp->params.proof) {
-            _imp->params.proof->initial_domain_is_empty(d.v);
-            return false;
-        }
     }
 
     if (_imp->params.lackey) {
@@ -425,18 +346,6 @@ auto BaseHomomorphismModel::initialise_domains(vector<HomomorphismDomain> & doma
     return true;
 }
 
-auto BaseHomomorphismModel::pattern_vertex_for_proof(int v) const -> NamedVertex
-{
-    if (v < 0 || unsigned(v) >= _imp->pattern_vertex_proof_names.size())
-        throw ProofError{ "Oops, there's a bug: v out of range in pattern" };
-    return pair{ v, _imp->pattern_vertex_proof_names[v] };
-}
-
-auto BaseHomomorphismModel::target_vertex_for_proof(int v) const -> NamedVertex
-{
-    if (v < 0 || unsigned(v) >= _imp->target_vertex_proof_names.size())
-        throw ProofError{ "Oops, there's a bug: v out of range in target" };
-    return pair{ v, _imp->target_vertex_proof_names[v] };
 /* Populate degrees from graph rows.*/
 auto BaseHomomorphismModel::_populate_degrees(vector<vector<int> > & degrees, const vector<SVOBitset> & graph_rows, int size) -> void {
     degrees.at(0).resize(size);
@@ -467,36 +376,6 @@ auto BaseHomomorphismModel::prepare() -> bool
 
         for (unsigned i = 0 ; i < p_gds.size() ; ++i)
             if (p_gds.at(i).second > t_gds.at(i).second) {
-                if (_imp->params.proof) {
-                    for (unsigned p = 0 ; p <= i ; ++p) {
-                        vector<int> n_p;
-                        auto np = _imp->pattern_graph_rows[p_gds.at(p).first * max_graphs + 0];
-                        for (unsigned j = 0 ; j < pattern_size ; ++j)
-                            if (np.test(j))
-                                n_p.push_back(j);
-
-                        for (unsigned t = i ; t < t_gds.size() ; ++t) {
-                            vector<int> n_t;
-                            auto nt = _imp->target_graph_rows[t_gds.at(t).first * max_graphs + 0];
-                            for (auto j = nt.find_first() ; j != decltype(nt)::npos ; j = nt.find_first()) {
-                                nt.reset(j);
-                                n_t.push_back(j);
-                            }
-
-                            _imp->params.proof->incompatible_by_degrees(0,
-                                    pattern_vertex_for_proof(p_gds.at(p).first), n_p,
-                                    target_vertex_for_proof(t_gds.at(t).first), n_t);
-                        }
-                    }
-
-                    vector<int> patterns, targets;
-                    for (unsigned p = 0 ; p <= i ; ++p)
-                        patterns.push_back(p_gds.at(p).first);
-                    for (unsigned t = 0 ; t < i ; ++t)
-                        targets.push_back(t_gds.at(t).first);
-
-                    _imp->params.proof->emit_hall_set_or_violator(patterns, targets);
-                }
                 return false;
             }
     }
@@ -506,64 +385,6 @@ auto BaseHomomorphismModel::prepare() -> bool
     if (supports_exact_path_graphs(_imp->params)) {
         _build_exact_path_graphs(_imp->pattern_graph_rows, pattern_size, next_pattern_supplemental, _imp->params.number_of_exact_path_graphs, _imp->directed);
         _build_exact_path_graphs(_imp->target_graph_rows, target_size, next_target_supplemental, _imp->params.number_of_exact_path_graphs, _imp->directed);
-
-        if (_imp->params.proof) {
-            for (int g = 1 ; g <= _imp->params.number_of_exact_path_graphs ; ++g) {
-                for (unsigned p = 0 ; p < pattern_size ; ++p) {
-                    for (unsigned q = 0 ; q < pattern_size ; ++q) {
-                        if (p == q || ! _imp->pattern_graph_rows[p * max_graphs + g].test(q))
-                            continue;
-
-                        auto named_p = pattern_vertex_for_proof(p);
-                        auto named_q = pattern_vertex_for_proof(q);
-
-                        auto n_p_q = _imp->pattern_graph_rows[p * max_graphs + 0];
-                        n_p_q &= _imp->pattern_graph_rows[q * max_graphs + 0];
-                        vector<NamedVertex> between_p_and_q;
-                        for (auto v = n_p_q.find_first() ; v != decltype(n_p_q)::npos ; v = n_p_q.find_first()) {
-                            n_p_q.reset(v);
-                            between_p_and_q.push_back(pattern_vertex_for_proof(v));
-                            if (between_p_and_q.size() >= unsigned(g))
-                                break;
-                        }
-
-                        for (unsigned t = 0 ; t < target_size ; ++t) {
-                            auto named_t = target_vertex_for_proof(t);
-
-                            vector<NamedVertex> named_n_t, named_d_n_t;
-                            vector<pair<NamedVertex, vector<NamedVertex> > > named_two_away_from_t;
-                            auto n_t = _imp->target_graph_rows[t * max_graphs + 0];
-                            for (auto w = n_t.find_first() ; w != decltype(n_t)::npos ; w = n_t.find_first()) {
-                                n_t.reset(w);
-                                named_n_t.push_back(target_vertex_for_proof(w));
-                            }
-
-                            auto nd_t = _imp->target_graph_rows[t * max_graphs + g];
-                            for (auto w = nd_t.find_first() ; w != decltype(nd_t)::npos ; w = nd_t.find_first()) {
-                                nd_t.reset(w);
-                                named_d_n_t.push_back(target_vertex_for_proof(w));
-                            }
-
-                            auto n2_t = _imp->target_graph_rows[t * max_graphs + 1];
-                            for (auto w = n2_t.find_first() ; w != decltype(n2_t)::npos ; w = n2_t.find_first()) {
-                                n2_t.reset(w);
-                                auto n_t_w = _imp->target_graph_rows[w * max_graphs + 0];
-                                n_t_w &= _imp->target_graph_rows[t * max_graphs + 0];
-                                vector<NamedVertex> named_n_t_w;
-                                for (auto x = n_t_w.find_first() ; x != decltype(n_t_w)::npos ; x = n_t_w.find_first()) {
-                                    n_t_w.reset(x);
-                                    named_n_t_w.push_back(target_vertex_for_proof(x));
-                                }
-                                named_two_away_from_t.emplace_back(target_vertex_for_proof(w), named_n_t_w);
-                            }
-
-                            _imp->params.proof->create_exact_path_graphs(g, named_p, named_q, between_p_and_q,
-                                    named_t, named_n_t, named_two_away_from_t, named_d_n_t);
-                        }
-                    }
-                }
-            }
-        }
     }
 
     if (supports_distance3_graphs(_imp->params)) {

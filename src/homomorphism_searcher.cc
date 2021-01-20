@@ -28,27 +28,6 @@ HomomorphismSearcher::HomomorphismSearcher(const CrosswordHomomorphismModel & m,
     }
 }
 
-auto HomomorphismSearcher::assignments_as_proof_decisions(const HomomorphismAssignments & assignments) const -> vector<pair<int, int> >
-{
-    vector<pair<int, int> > trail;
-    for (auto & a : assignments.values)
-        if (a.is_decision)
-            trail.emplace_back(a.assignment.pattern_vertex, a.assignment.target_vertex);
-    return trail;
-}
-
-auto HomomorphismSearcher::solution_in_proof_form(const HomomorphismAssignments & assignments) const -> vector<pair<NamedVertex, NamedVertex> >
-{
-    vector<pair<NamedVertex, NamedVertex> > solution;
-    for (auto & a : assignments.values)
-        if (solution.end() == find_if(solution.begin(), solution.end(),
-                    [&] (const auto & t) { return unsigned(t.first.first) == a.assignment.pattern_vertex; }))
-            solution.emplace_back(
-                    model.pattern_vertex_for_proof(a.assignment.pattern_vertex),
-                    model.target_vertex_for_proof(a.assignment.target_vertex));
-    return solution;
-}
-
 auto HomomorphismSearcher::expand_to_full_result(const HomomorphismAssignments & assignments, VertexToVertexMapping & mapping) -> void
 {
     for (auto & a : assignments.values)
@@ -97,9 +76,6 @@ auto HomomorphismSearcher::restarting_search(
                 }
             }
         }
-
-        if (params.proof)
-            params.proof->post_solution(solution_in_proof_form(assignments));
 
         if (params.count_solutions) {
             // we could be finding duplicate solutions, in threaded search
@@ -162,8 +138,6 @@ auto HomomorphismSearcher::restarting_search(
 
     // for each value remaining...
     for (auto f_v = branch_v.begin(), f_end = branch_v.begin() + branch_v_end ; f_v != f_end ; ++f_v) {
-        if (params.proof)
-            params.proof->guessing(depth, model.pattern_vertex_for_proof(branch_domain->v), model.target_vertex_for_proof(*f_v));
 
         // modified in-place by appending, we can restore by shrinking
         auto assignments_size = assignments.values.size();
@@ -178,17 +152,12 @@ auto HomomorphismSearcher::restarting_search(
         ++propagations;
         if (! propagate(new_domains, assignments, use_lackey_for_propagation || (params.propagate_using_lackey == PropagateUsingLackey::Always))) {
             // failure? restore assignments and go on to the next thing
-            if (params.proof)
-                params.proof->propagation_failure(assignments_as_proof_decisions(assignments), model.pattern_vertex_for_proof(branch_domain->v), model.target_vertex_for_proof(*f_v));
 
             assignments.values.resize(assignments_size);
             actually_hit_a_failure = true;
 
             continue;
         }
-
-        if (params.proof)
-            params.proof->start_level(depth + 2);
 
         // recursive search
         auto search_result = restarting_search(assignments, new_domains, nodes, propagations,
@@ -215,12 +184,6 @@ auto HomomorphismSearcher::restarting_search(
                 return SearchResult::Restart;
 
             case SearchResult::SatisfiableButKeepGoing:
-                if (params.proof) {
-                    params.proof->back_up_to_level(depth + 1);
-                    params.proof->incorrect_guess(assignments_as_proof_decisions(assignments), false);
-                    params.proof->forget_level(depth + 2);
-                }
-
                 // restore assignments
                 assignments.values.resize(assignments_size);
                 break;
@@ -230,12 +193,6 @@ auto HomomorphismSearcher::restarting_search(
                 [[ std::fallthrough ]];
 
             case SearchResult::Unsatisfiable:
-                if (params.proof) {
-                    params.proof->back_up_to_level(depth + 1);
-                    params.proof->incorrect_guess(assignments_as_proof_decisions(assignments), true);
-                    params.proof->forget_level(depth + 2);
-                }
-
                 // restore assignments
                 assignments.values.resize(assignments_size);
                 actually_hit_a_failure = true;
@@ -247,15 +204,10 @@ auto HomomorphismSearcher::restarting_search(
     }
 
     // no values remaining, backtrack, or possibly kick off a restart
-    if (params.proof)
-        params.proof->out_of_guesses(assignments_as_proof_decisions(assignments));
-
     if (actually_hit_a_failure)
         restarts_schedule.did_a_backtrack();
 
     if (restarts_schedule.should_restart()) {
-        if (params.proof)
-            params.proof->back_up_to_top();
         post_nogood(assignments);
         return SearchResult::Restart;
     }
@@ -326,9 +278,6 @@ auto HomomorphismSearcher::post_nogood(const HomomorphismAssignments & assignmen
             nogood.literals.emplace_back(a.assignment);
 
     watches.post_nogood(move(nogood));
-
-    if (params.proof)
-        params.proof->post_restart_nogood(assignments_as_proof_decisions(assignments));
 }
 
 auto HomomorphismSearcher::copy_nonfixed_domains_and_make_assignment(
@@ -593,11 +542,6 @@ auto HomomorphismSearcher::propagate(Domains & new_domains, HomomorphismAssignme
         // ok, make the assignment
         branch_domain->fixed = true;
         assignments.values.push_back({ current_assignment, false, -1, -1 });
-
-        if (params.proof)
-            params.proof->unit_propagating(
-                    model.pattern_vertex_for_proof(current_assignment.pattern_vertex),
-                    model.target_vertex_for_proof(current_assignment.target_vertex));
 
         // propagate watches
         if (might_have_watches(params))

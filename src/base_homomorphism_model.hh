@@ -47,7 +47,7 @@ class BaseHomomorphismModel
 
             std::vector<int> pattern_loops, target_loops;
 
-            std::vector<std::string> pattern_vertex_proof_names, target_vertex_proof_names;
+            // std::vector<std::string> pattern_vertex_proof_names, target_vertex_proof_names;
 
             Imp(const HomomorphismParams & p) :
                 params(p)
@@ -93,8 +93,8 @@ class BaseHomomorphismModel
         BaseHomomorphismModel(const InputGraph & target, const InputGraph & pattern, const HomomorphismParams & params);
         ~BaseHomomorphismModel();
 
-        auto pattern_vertex_for_proof(int v) const -> NamedVertex;
-        auto target_vertex_for_proof(int v) const -> NamedVertex;
+        // auto pattern_vertex_for_proof(int v) const -> NamedVertex;
+        // auto target_vertex_for_proof(int v) const -> NamedVertex;
 
         auto prepare() -> bool;
 

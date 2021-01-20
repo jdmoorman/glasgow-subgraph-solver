@@ -86,9 +86,9 @@ class HomomorphismSearcher
 
         std::mt19937 global_rand;
 
-        auto assignments_as_proof_decisions(const HomomorphismAssignments & assignments) const -> std::vector<std::pair<int, int> >;
-
-        auto solution_in_proof_form(const HomomorphismAssignments & assignments) const -> std::vector<std::pair<NamedVertex, NamedVertex> >;
+        // auto assignments_as_proof_decisions(const HomomorphismAssignments & assignments) const -> std::vector<std::pair<int, int> >;
+        //
+        // auto solution_in_proof_form(const HomomorphismAssignments & assignments) const -> std::vector<std::pair<NamedVertex, NamedVertex> >;
 
         template <bool directed_, bool has_edge_labels_, bool induced_>
         auto propagate_adjacency_constraints(HomomorphismDomain & d, const HomomorphismAssignment & current_assignment) -> void;
