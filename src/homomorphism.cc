@@ -148,8 +148,8 @@ namespace
                     }
                 }
                 else {
-                    if (params.proof)
-                        params.proof->root_propagation_failed();
+                    // if (params.proof)
+                    //     params.proof->root_propagation_failed();
                     result.complete = true;
                     done = true;
                 }
