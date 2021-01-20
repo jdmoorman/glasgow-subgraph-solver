@@ -137,6 +137,7 @@ class SVOBitset
                 std::fill(_data.long_data, _data.long_data + n_words, 0);
         }
 
+        // Set the ath bit to 1.
         auto set(int a) -> void
         {
             BitWord * b = (_is_long() ? _data.long_data : _data.short_data);
