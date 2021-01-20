@@ -78,6 +78,8 @@ class BaseHomomorphismModel
 
         auto _multiset_item_counts(const std::multiset<std::string>&) const -> std::map<std::string, int>;
 
+        auto _populate_degrees(std::vector<std::vector<int> > & degrees, const std::vector<SVOBitset> & graph_rows, int size) -> void;
+
         auto _record_edge_labels(std::map<std::multiset<std::string>, int>& label_map, const InputGraph & graph, std::vector<int>& graph_edge_labels) -> void;
 
     public:

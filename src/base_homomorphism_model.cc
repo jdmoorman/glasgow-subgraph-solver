@@ -437,6 +437,11 @@ auto BaseHomomorphismModel::target_vertex_for_proof(int v) const -> NamedVertex
     if (v < 0 || unsigned(v) >= _imp->target_vertex_proof_names.size())
         throw ProofError{ "Oops, there's a bug: v out of range in target" };
     return pair{ v, _imp->target_vertex_proof_names[v] };
+/* Populate degrees from graph rows.*/
+auto BaseHomomorphismModel::_populate_degrees(vector<vector<int> > & degrees, const vector<SVOBitset> & graph_rows, int size) -> void {
+    degrees.at(0).resize(size);
+    for (unsigned i = 0 ; i < size ; ++i)
+        degrees.at(0).at(i) = graph_rows[i * max_graphs + 0].count();
 }
 
 auto BaseHomomorphismModel::prepare() -> bool
@@ -445,14 +450,8 @@ auto BaseHomomorphismModel::prepare() -> bool
         return false;
 
     // pattern and target degrees, for the main graph
-    _imp->patterns_degrees.at(0).resize(pattern_size);
-    _imp->targets_degrees.at(0).resize(target_size);
-
-    for (unsigned i = 0 ; i < pattern_size ; ++i)
-        _imp->patterns_degrees.at(0).at(i) = _imp->pattern_graph_rows[i * max_graphs + 0].count();
-
-    for (unsigned i = 0 ; i < target_size ; ++i)
-        _imp->targets_degrees.at(0).at(i) = _imp->target_graph_rows[i * max_graphs + 0].count();
+    _populate_degrees(_imp->patterns_degrees, _imp->pattern_graph_rows, pattern_size);
+    _populate_degrees(_imp->targets_degrees, _imp->target_graph_rows, target_size);
 
     if (global_degree_is_preserved(_imp->params)) {
         vector<pair<int, int> > p_gds, t_gds;
