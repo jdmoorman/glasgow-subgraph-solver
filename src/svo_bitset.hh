@@ -8,6 +8,7 @@
 #include <cstring>
 #include <limits>
 
+// TODO: Handle short_data and long_data in a better way.
 class SVOBitset
 {
     private:
@@ -103,24 +104,30 @@ class SVOBitset
             }
         }
 
-        auto find_first() const -> unsigned
+        // TODO: Should we return n_words instead of npos?
+        auto find_next(unsigned start_id) const -> unsigned
         {
             if (! _is_long()) {
-                for (unsigned i = 0 ; i < n_words ; ++i) {
+                for (unsigned i = start_id ; i < n_words ; ++i) {
                     int x = __builtin_ffsll(_data.short_data[i]);
-                    if (0 != x)
+                    if (x != 0)
                         return i * bits_per_word + x - 1;
                 }
                 return npos;
             }
             else {
-                for (unsigned i = 0, i_end = n_words ; i < i_end ; ++i) {
+                for (unsigned i = start_id ; i < n_words ; ++i) {
                     int x = __builtin_ffsll(_data.long_data[i]);
-                    if (0 != x)
+                    if (x != 0)
                         return i * bits_per_word + x - 1;
                 }
                 return npos;
             }
+        }
+
+        auto find_first() const -> unsigned
+        {
+            return find_next(0);
         }
 
         auto reset(int a) -> void
