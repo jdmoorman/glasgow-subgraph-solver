@@ -458,14 +458,15 @@ auto BaseHomomorphismModel::_build_exact_path_graphs(vector<SVOBitset> & graph_r
     idx += number_of_exact_path_graphs;
 }
 
+// TODO: Change to use find_next().
 auto BaseHomomorphismModel::_build_distance3_graphs(vector<SVOBitset> & graph_rows, unsigned size, unsigned & idx) -> void
 {
     for (unsigned v = 0 ; v < size ; ++v) {
         auto nv = graph_rows[v * max_graphs + 0];
-        for (auto c = nv.find_first() ; c != decltype(nv)::npos ; c = nv.find_first()) {
+        for (auto c = nv.find_first() ; c != SVOBitset::npos ; c = nv.find_first()) {
             nv.reset(c);
             auto nc = graph_rows[c * max_graphs + 0];
-            for (auto w = nc.find_first() ; w != decltype(nc)::npos ; w = nc.find_first()) {
+            for (auto w = nc.find_first() ; w != SVOBitset::npos ; w = nc.find_first()) {
                 nc.reset(w);
                 // v--c--w so v is within distance 3 of w's neighbours
                 graph_rows[v * max_graphs + idx] |= graph_rows[w * max_graphs + 0];
@@ -476,6 +477,7 @@ auto BaseHomomorphismModel::_build_distance3_graphs(vector<SVOBitset> & graph_ro
     ++idx;
 }
 
+// TODO: Change to use find_next().
 auto BaseHomomorphismModel::_build_k4_graphs(vector<SVOBitset> & graph_rows, unsigned size, unsigned & idx) -> void
 {
     for (unsigned v = 0 ; v < size ; ++v) {
@@ -491,10 +493,10 @@ auto BaseHomomorphismModel::_build_k4_graphs(vector<SVOBitset> & graph_rows, uns
                 if (count >= 2) {
                     bool done = false;
                     auto cn1 = common_neighbours;
-                    for (auto x = cn1.find_first() ; x != decltype(cn1)::npos && ! done ; x = cn1.find_first()) {
+                    for (auto x = cn1.find_first() ; x != SVOBitset::npos && ! done ; x = cn1.find_first()) {
                         cn1.reset(x);
                         auto cn2 = common_neighbours;
-                        for (auto y = cn2.find_first() ; y != decltype(cn2)::npos && ! done ; y = cn2.find_first()) {
+                        for (auto y = cn2.find_first() ; y != SVOBitset::npos && ! done ; y = cn2.find_first()) {
                             cn2.reset(y);
                             if (v != w && v != x && v != y && w != x && w != y && graph_rows[x * max_graphs + 0].test(y)) {
                                 graph_rows[v * max_graphs + idx].set(w);
