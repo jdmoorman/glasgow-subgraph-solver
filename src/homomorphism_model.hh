@@ -18,7 +18,7 @@ class HomomorphismModel : public BaseHomomorphismModel
         HomomorphismModel(const InputGraph & target, const InputGraph & pattern, const HomomorphismParams & params);
         auto target_edge_label(int t, int u) const -> int;
         using BaseHomomorphismModel::check_edge_label_compatibility;
-        auto check_edge_label_compatibility(int p_lid, int t_lid) const -> bool;
+        auto check_edge_label_compatibility(const int t_v1, const int t_v2, const int p_lid) const -> bool;
 };
 
 #endif

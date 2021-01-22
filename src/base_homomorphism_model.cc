@@ -11,6 +11,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <stdexcept>
 
 using std::greater;
 using std::list;

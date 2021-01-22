@@ -73,8 +73,9 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
 
 }
 
-auto HomomorphismModel::check_edge_label_compatibility(int p_lid, int t_lid) const -> bool
+auto HomomorphismModel::check_edge_label_compatibility(const int t_v1, const int t_v2, const int p_lid) const -> bool
 {
+    int t_lid = target_edge_label(t_v1, t_v2);
     return edge_label_compatibility[p_lid][t_lid];
 }
 
