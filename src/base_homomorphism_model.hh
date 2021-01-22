@@ -7,7 +7,7 @@
 #include "svo_bitset.hh"
 #include "homomorphism.hh"
 #include "homomorphism_domain.hh"
-#include "proof.hh"
+// #include "proof.hh"
 
 #include <memory>
 #include <set>
@@ -92,9 +92,6 @@ class BaseHomomorphismModel
 
         BaseHomomorphismModel(const InputGraph & target, const InputGraph & pattern, const HomomorphismParams & params);
         ~BaseHomomorphismModel();
-
-        // auto pattern_vertex_for_proof(int v) const -> NamedVertex;
-        // auto target_vertex_for_proof(int v) const -> NamedVertex;
 
         auto prepare() -> bool;
 

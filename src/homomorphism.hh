@@ -10,7 +10,7 @@
 #include "timeout.hh"
 #include "value_ordering.hh"
 #include "vertex_to_vertex_mapping.hh"
-#include "proof-fwd.hh"
+// #include "proof-fwd.hh"
 
 #include <functional>
 #include <list>

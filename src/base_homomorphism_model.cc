@@ -50,13 +50,6 @@ BaseHomomorphismModel::BaseHomomorphismModel(const InputGraph & target, const In
     if (max_graphs > 8 * sizeof(PatternAdjacencyBitsType))
         throw UnsupportedConfiguration{ "Supplemental graphs won't fit in the chosen bitset size" };
 
-    // if (_imp->params.proof) {
-    //     for (int v = 0 ; v < pattern.size() ; ++v)
-    //         _imp->pattern_vertex_proof_names.push_back(pattern.vertex_name(v));
-    //     for (int v = 0 ; v < target.size() ; ++v)
-    //         _imp->target_vertex_proof_names.push_back(target.vertex_name(v));
-    // }
-
     // recode pattern to a bit graph, and strip out loops
     _imp->pattern_graph_rows.resize(pattern_size * max_graphs, SVOBitset(pattern_size, 0));
     _imp->pattern_loops.resize(pattern_size);
@@ -84,7 +77,7 @@ BaseHomomorphismModel::BaseHomomorphismModel(const InputGraph & target, const In
     map<string, int> vertex_labels_map;
     int next_vertex_label = 1;
     if (pattern.has_vertex_labels()) {
-        // target vertex labels
+        // pattern vertex labels
         for (unsigned i = 0 ; i < pattern_size ; ++i) {
             if (vertex_labels_map.emplace(pattern.vertex_label(i), next_vertex_label).second)
                 ++next_vertex_label;
@@ -350,7 +343,7 @@ auto BaseHomomorphismModel::initialise_domains(vector<HomomorphismDomain> & doma
 /* Populate degrees from graph rows.*/
 auto BaseHomomorphismModel::_populate_degrees(vector<vector<int> > & degrees, const vector<SVOBitset> & graph_rows, int size) -> void {
     degrees.at(0).resize(size);
-    for (unsigned i = 0 ; i < size ; ++i)
+    for (int i = 0 ; i < size ; ++i)
         degrees.at(0).at(i) = graph_rows[i * max_graphs + 0].count();
 }
 
@@ -450,7 +443,7 @@ auto BaseHomomorphismModel::_build_exact_path_graphs(vector<SVOBitset> & graph_r
 
     for (unsigned v = 0 ; v < size ; ++v) {
         for (unsigned w = (directed ? 0 : v) ; w < size ; ++w) {
-            // nuless directed, w to v, not v to w, see above
+            // unless directed, w to v, not v to w, see above
             unsigned path_count = path_counts[w][v];
             for (unsigned p = 1 ; p <= number_of_exact_path_graphs ; ++p) {
                 if (path_count >= p) {

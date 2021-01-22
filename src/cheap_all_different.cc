@@ -12,6 +12,7 @@ using std::vector;
 
 namespace
 {
+    //TODO: remove proof option.
     template <bool proof_>
     auto cheap_all_different_with_optional_proofs(
             unsigned target_size,
@@ -64,7 +65,7 @@ namespace
                 if constexpr (proof_)
                     if (last_outputted_hall_size != hall.count() && d.count != old_d_values_count) {
                         last_outputted_hall_size = hall.count();
-                        proof->emit_hall_set_or_violator(hall_lhs, hall_rhs);
+                        // proof->emit_hall_set_or_violator(hall_lhs, hall_rhs);
                     }
 
                 if (0 == d.count)
@@ -84,7 +85,7 @@ namespace
                             d.reset(v);
                             rhs.push_back(v);
                         }
-                        proof->emit_hall_set_or_violator(lhs, rhs);
+                        // proof->emit_hall_set_or_violator(lhs, rhs);
                     }
                     return false;
                 }
@@ -111,9 +112,8 @@ namespace
 
 auto cheap_all_different(unsigned target_size, vector<HomomorphismDomain> & domains, const unique_ptr<Proof> & proof) -> bool
 {
-    if (! proof.get())
-        return cheap_all_different_with_optional_proofs<false>(target_size, domains, proof);
-    else
-        return cheap_all_different_with_optional_proofs<true>(target_size, domains, proof);
+    // if (! proof.get())
+    return cheap_all_different_with_optional_proofs<false>(target_size, domains, proof);
+    // else
+    //     return cheap_all_different_with_optional_proofs<true>(target_size, domains, proof);
 }
-
