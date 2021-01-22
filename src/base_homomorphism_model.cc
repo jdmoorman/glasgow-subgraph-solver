@@ -237,7 +237,7 @@ auto BaseHomomorphismModel::_check_degree_compatibility(
         for (unsigned g = 0 ; g < graphs_to_consider ; ++g) {
             targets_ndss.at(g).at(t) = vector<int>{};
             auto ni = target_graph_row(g, t);
-            for (auto j = ni.find_first() ; j != decltype(ni)::npos ; j = ni.find_first()) {
+            for (auto j = ni.find_first() ; j != SVOBitset::npos ; j = ni.find_first()) {
                 ni.reset(j);
                 targets_ndss.at(g).at(t)->push_back(target_degree(g, j));
             }
@@ -276,7 +276,7 @@ auto BaseHomomorphismModel::initialise_domains(vector<HomomorphismDomain> & doma
         for (unsigned g = 0 ; g < graphs_to_consider ; ++g) {
             for (unsigned i = 0 ; i < pattern_size ; ++i) {
                 auto ni = pattern_graph_row(g, i);
-                for (auto j = ni.find_first() ; j != decltype(ni)::npos ; j = ni.find_first()) {
+                for (auto j = ni.find_first() ; j != SVOBitset::npos ; j = ni.find_first()) {
                     ni.reset(j);
                     patterns_ndss.at(g).at(i).push_back(pattern_degree(g, j));
                 }
