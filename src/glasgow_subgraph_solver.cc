@@ -3,6 +3,7 @@
 #include "formats/read_file_format.hh"
 #include "homomorphism.hh"
 #include "sip_decomposer.hh"
+#include "homomorphism_params.hh"
 #include "lackey.hh"
 #include "symmetries.hh"
 #include "restarts.hh"

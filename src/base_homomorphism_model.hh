@@ -5,7 +5,7 @@
 
 #include "formats/input_graph.hh"
 #include "svo_bitset.hh"
-#include "homomorphism.hh"
+#include "homomorphism_params.hh"
 #include "homomorphism_domain.hh"
 // #include "proof.hh"
 

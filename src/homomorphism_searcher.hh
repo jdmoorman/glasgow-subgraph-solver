@@ -5,6 +5,7 @@
 
 #include "crossword_homomorphism_model.hh"
 #include "homomorphism.hh"
+#include "homomorphism_params.hh"
 #include "homomorphism_domain.hh"
 #include "homomorphism_model.hh"
 #include "homomorphism_traits.hh"

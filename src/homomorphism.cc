@@ -3,7 +3,7 @@
 #include "homomorphism.hh"
 #include "configuration.hh"
 #include "homomorphism_domain.hh"
-#include "crossword_homomorphism_model.hh"
+// #include "base_homomorphism_model.hh"
 #include "homomorphism_searcher.hh"
 #include "homomorphism_traits.hh"
 #include "thread_utils.hh"

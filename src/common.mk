@@ -12,6 +12,7 @@ SOURCES := \
     homomorphism.cc \
     homomorphism_domain.cc \
     homomorphism_model.cc \
+	homomorphism_params.cc \
     homomorphism_searcher.cc \
     homomorphism_traits.cc \
     lackey.cc \
