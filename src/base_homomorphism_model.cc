@@ -188,7 +188,7 @@ auto BaseHomomorphismModel::check_edge_label_compatibility(const multiset<string
 }
 
 // TODO: change name
-auto BaseHomomorphismModel::_check_label_compatibility(int p, int t) const -> bool
+auto BaseHomomorphismModel::_check_label_compatibility(const int p, const int t) const -> bool
 {
     if (! has_vertex_labels())
         return true;

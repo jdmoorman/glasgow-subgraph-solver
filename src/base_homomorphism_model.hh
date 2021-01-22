@@ -74,7 +74,7 @@ class BaseHomomorphismModel
 
         auto _check_loop_compatibility(int p, int t) const -> bool;
 
-        auto _check_label_compatibility(int p, int t) const -> bool;
+        auto _check_label_compatibility(const int p, const int t) const -> bool;
 
         auto _multiset_item_counts(const std::multiset<std::string>&) const -> std::map<std::string, int>;
 
