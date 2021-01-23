@@ -42,8 +42,7 @@ struct HomomorphismResult
 };
 
 auto solve_homomorphism_problem(
-        const InputGraph & pattern,
-        const InputGraph & target,
+        BaseHomomorphismModel & model,
         const HomomorphismParams & params) -> HomomorphismResult;
 
 #endif

@@ -58,10 +58,10 @@ namespace
     {
         using Domains = vector<HomomorphismDomain>;
 
-        const CrosswordHomomorphismModel & model;
+        const BaseHomomorphismModel & model;
         const HomomorphismParams & params;
 
-        HomomorphismSolver(const CrosswordHomomorphismModel & m, const HomomorphismParams & p) :
+        HomomorphismSolver(const BaseHomomorphismModel & m, const HomomorphismParams & p) :
             model(m),
             params(p)
         {
@@ -208,7 +208,7 @@ namespace
     {
         unsigned n_threads;
 
-        ThreadedSolver(const CrosswordHomomorphismModel & m, const HomomorphismParams & p, unsigned t) :
+        ThreadedSolver(const BaseHomomorphismModel & m, const HomomorphismParams & p, unsigned t) :
             HomomorphismSolver(m, p),
             n_threads(t)
         {
@@ -400,10 +400,11 @@ namespace
     };
 }
 
+//TODO: Remove params argument and get info from model instead.
 auto solve_homomorphism_problem(
-        const InputGraph & pattern,
-        const InputGraph & target,
-        const HomomorphismParams & params) -> HomomorphismResult
+        BaseHomomorphismModel & model,
+        const HomomorphismParams & params
+    ) -> HomomorphismResult
 {
 
     // first sanity check: if we're finding an injective mapping, and there

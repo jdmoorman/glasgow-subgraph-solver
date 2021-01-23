@@ -16,7 +16,7 @@ using std::to_string;
 using std::uniform_int_distribution;
 using std::vector;
 
-HomomorphismSearcher::HomomorphismSearcher(const CrosswordHomomorphismModel & m, const HomomorphismParams & p,
+HomomorphismSearcher::HomomorphismSearcher(const BaseHomomorphismModel & m, const HomomorphismParams & p,
         const DuplicateSolutionFilterer & d) :
     model(m),
     params(p),

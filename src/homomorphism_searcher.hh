@@ -3,7 +3,7 @@
 #ifndef GLASGOW_SUBGRAPH_SOLVER_GUARD_SRC_HOMOMORPHISM_SEARCHER_HH
 #define GLASGOW_SUBGRAPH_SOLVER_GUARD_SRC_HOMOMORPHISM_SEARCHER_HH 1
 
-#include "crossword_homomorphism_model.hh"
+#include "base_homomorphism_model.hh"
 #include "homomorphism.hh"
 #include "homomorphism_params.hh"
 #include "homomorphism_domain.hh"
@@ -81,7 +81,7 @@ class HomomorphismSearcher
     private:
         using Domains = std::vector<HomomorphismDomain>;
 
-        const CrosswordHomomorphismModel & model;
+        const BaseHomomorphismModel & model;
         const HomomorphismParams & params;
         const DuplicateSolutionFilterer _duplicate_solution_filterer;
 
@@ -122,7 +122,7 @@ class HomomorphismSearcher
                 ) -> void;
 
     public:
-        HomomorphismSearcher(const CrosswordHomomorphismModel & m, const HomomorphismParams & p,
+        HomomorphismSearcher(const BaseHomomorphismModel & m, const HomomorphismParams & p,
                 const DuplicateSolutionFilterer &);
 
         auto expand_to_full_result(const HomomorphismAssignments & assignments, VertexToVertexMapping & mapping) -> void;
