@@ -399,9 +399,7 @@ auto BaseHomomorphismModel::prepare() -> bool
     for (unsigned g = 1 ; g < max_graphs ; ++g) {
         _imp->patterns_degrees.at(g).resize(pattern_size);
         _imp->targets_degrees.at(g).resize(target_size);
-    }
 
-    for (unsigned g = 1 ; g < max_graphs ; ++g) {
         for (unsigned i = 0 ; i < pattern_size ; ++i)
             _imp->patterns_degrees.at(g).at(i) = _imp->pattern_graph_rows[i * max_graphs + g].count();
 
