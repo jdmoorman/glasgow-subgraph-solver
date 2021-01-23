@@ -1,8 +1,8 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
+#include "crossword_homomorphism_model.hh"
 #include "formats/read_file_format.hh"
 #include "homomorphism.hh"
-#include "sip_decomposer.hh"
 #include "homomorphism_params.hh"
 #include "lackey.hh"
 #include "symmetries.hh"
@@ -371,11 +371,9 @@ auto main(int argc, char * argv[]) -> int
         if (was_given_automorphism_group)
             cout << "pattern_automorphism_group_size = " << pattern_automorphism_group_size << endl;
 
-        // Decomposition defaults to false.
         // THIS IS THE CALL TO SOLVE
-        auto result = options_vars.count("decomposition") ?
-            solve_sip_by_decomposition(pattern, target, params) :
-            solve_homomorphism_problem(pattern, target, params);
+        CrosswordHomomorphismModel model(target, pattern, params);
+        auto result = solve_homomorphism_problem(model, params);
 
         /* Stop the clock. */
         auto overall_time = duration_cast<milliseconds>(steady_clock::now() - params.start_time);
