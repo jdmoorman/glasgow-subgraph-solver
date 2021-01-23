@@ -20,6 +20,7 @@
 #include <thread>
 #include <unordered_set>
 #include <utility>
+#include <iostream>
 
 #include <boost/thread/barrier.hpp>
 #include <boost/functional/hash.hpp>
@@ -75,6 +76,7 @@ namespace
         auto solve() -> HomomorphismResult
         {
             HomomorphismResult result;
+            std::cout << "Beggining solve" << std::endl;
 
             // Set of values for a given variable (node). i.e. node candidates
             // domains
@@ -123,33 +125,37 @@ namespace
                     switch (searcher.restarting_search(assignments_copy, domains, result.nodes, result.propagations,
                                 result.solution_count, 0, *params.restarts_schedule)) {
                         case SearchResult::Satisfiable:
+                            std::cout << "Satisfiable" << std::endl;
                             searcher.save_result(assignments_copy, result);
                             result.complete = true;
                             done = true;
                             break;
 
                         case SearchResult::SatisfiableButKeepGoing:
+                            std::cout << "SatisfiableButKeepGoing" << std::endl;
                             result.complete = true;
                             done = true;
                             break;
 
                         case SearchResult::UnsatisfiableAndBackjumpUsingLackey:
+                            std::cout << "UnsatisfiableAndBackjumpUsingLackey" << std::endl;
                         case SearchResult::Unsatisfiable:
+                            std::cout << "Unsatisfiable" << std::endl;
                             result.complete = true;
                             done = true;
                             break;
 
                         case SearchResult::Aborted:
+                            std::cout << "Aborted" << std::endl;
                             done = true;
                             break;
 
                         case SearchResult::Restart:
+                            std::cout << "Restart" << std::endl;
                             break;
                     }
                 }
                 else {
-                    // if (params.proof)
-                    //     params.proof->root_propagation_failed();
                     result.complete = true;
                     done = true;
                 }
@@ -405,66 +411,13 @@ auto solve_homomorphism_problem(
     //     if (1 != params.n_threads)
     //         throw UnsupportedConfiguration{ "Proof logging cannot yet be used with threads" };
     //     if (params.lackey)
-    //         throw UnsupportedConfiguration{ "Proof logging cannot yet be used with a lackey" };
-    //     if (! params.pattern_less_constraints.empty())
-    //         throw UnsupportedConfiguration{ "Proof logging cannot yet be used with less-constraints" };
-    //     if (params.injectivity != Injectivity::Injective)
-    //         throw UnsupportedConfiguration{ "Proof logging can currently only be used with injectivity" };
-    //     if (params.induced)
-    //         throw UnsupportedConfiguration{ "Proof logging cannot yet be used for induced problems" };
-    //     if (pattern.has_vertex_labels() || pattern.has_edge_labels())
-    //         throw UnsupportedConfiguration{ "Proof logging cannot yet be used on labelled graphs" };
-    //
-    //     // set up our model file, with a set of OPB variables for each CP variable
-    //     for (int n = 0 ; n < pattern.size() ; ++n) {
-    //         params.proof->create_cp_variable(n, target.size(),
-    //                 [&] (int v) { return pattern.vertex_name(v); },
-    //                 [&] (int v) { return target.vertex_name(v); });
-    //     }
-    //
-    //     // generate constraints for injectivity
-    //     params.proof->create_injectivity_constraints(pattern.size(), target.size());
-    //
-    //     // generate edge constraints, and also handle loops here
-    //     for (int p = 0 ; p < pattern.size() ; ++p) {
-    //         for (int t = 0 ; t < target.size() ; ++t) {
-    //             if (pattern.adjacent(p, p) && ! target.adjacent(t, t))
-    //                 params.proof->create_forbidden_assignment_constraint(p, t);
-    //
-    //             // it's simpler to always have the adjacency constraints, even
-    //             // if the assignment is forbidden
-    //             params.proof->start_adjacency_constraints_for(p, t);
-    //
-    //             // if p can be mapped to t, then each neighbour of p...
-    //             for (int q = 0 ; q < pattern.size() ; ++q)
-    //                 if (q != p && pattern.adjacent(p, q)) {
-    //                     // ... must be mapped to a neighbour of t
-    //                     vector<int> permitted;
-    //                     for (int u = 0 ; u < target.size() ; ++u)
-    //                         if (t != u && target.adjacent(t, u))
-    //                             permitted.push_back(u);
-    //                     params.proof->create_adjacency_constraint(p, q, t, permitted);
-    //                 }
-    //         }
-    //     }
-    //
-    //     // output the model file
-    //     params.proof->finalise_model();
-    // }
 
     // first sanity check: if we're finding an injective mapping, and there
     // aren't enough vertices, fail immediately.
-    if (is_nonshrinking(params) && (pattern.size() > target.size())) {
-        // if (params.proof) {
-        //     params.proof->failure_due_to_pattern_bigger_than_target();
-        //     params.proof->finish_unsat_proof();
-        // }
-
+    if (is_nonshrinking(params) && (model.pattern_size > model.target_size)) {
         return HomomorphismResult{ };
     }
 
-    // Just solve the problem.
-    CrosswordHomomorphismModel model(target, pattern, params);
 
     if (! model.prepare()) {
         HomomorphismResult result;
@@ -474,6 +427,7 @@ auto solve_homomorphism_problem(
         //     params.proof->finish_unsat_proof();
         return result;
     }
+    std::cout << "Start solve" << std::endl;
 
     HomomorphismResult result;
     if (1 == params.n_threads) {
@@ -488,9 +442,6 @@ auto solve_homomorphism_problem(
         ThreadedSolver solver(model, params, n_threads);
         result = solver.solve();
     }
-
-    // if (params.proof && result.complete && result.mapping.empty())
-    //     params.proof->finish_unsat_proof();
 
     return result;
 }
