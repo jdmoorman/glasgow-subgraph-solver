@@ -8,6 +8,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 using std::ifstream;
 using std::nullopt;
@@ -103,9 +104,23 @@ namespace
         for (auto & [v, l] : vertices)
             result.set_vertex_name(l, rename(v));
 
-        if (seen_vertex_label)
-            for (auto & [v, l] : vertices)
+        // // Print Edges and corresponding labels.
+        // std::cout << "Edge labels " << "(size " << result.edges().size()  << "): "<< std::endl;
+        // for (const auto& [edge, labels] : result.edges()) {
+        //     std::cout << result.vertex_name(edge.first) << " (" << edge.first << ") " << result.vertex_name(edge.second) <<  " (" << edge.second << ") " <<": ";
+        //     // Print label multiset.
+        //     for (const auto& label : labels)
+        //         std::cout << label << " ";
+        //     std::cout << std::endl;
+        // }
+
+        if (seen_vertex_label){
+            // std::cout << "Vertex labels " << "(size " << vertices.size()  << "): "<< std::endl;
+            for (auto & [v, l] : vertices){
+                // std::cout << v << ": " << std::endl;
                 result.set_vertex_label(l, vertex_labels[v]);
+            }
+        }
 
         return result;
     }
