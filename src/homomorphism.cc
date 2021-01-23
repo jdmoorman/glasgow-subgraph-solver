@@ -97,6 +97,7 @@ namespace
             bool done = false;
             unsigned number_of_restarts = 0;
 
+            std::cout << "Initializing searcher" << std::endl;
             HomomorphismSearcher searcher(model, params, [] (const HomomorphismAssignments &) -> bool { return true; });
 
             while (! done) {
@@ -404,13 +405,6 @@ auto solve_homomorphism_problem(
         const InputGraph & target,
         const HomomorphismParams & params) -> HomomorphismResult
 {
-    // // start by setting up proof logging, if necessary
-    // if (params.proof) {
-    //     // proof logging is currently incompatible with a whole load of "extra" features,
-    //     // but can be adapted to support most of them
-    //     if (1 != params.n_threads)
-    //         throw UnsupportedConfiguration{ "Proof logging cannot yet be used with threads" };
-    //     if (params.lackey)
 
     // first sanity check: if we're finding an injective mapping, and there
     // aren't enough vertices, fail immediately.
@@ -418,13 +412,11 @@ auto solve_homomorphism_problem(
         return HomomorphismResult{ };
     }
 
-
+    std::cout << "Prepare: " << std::endl;
     if (! model.prepare()) {
         HomomorphismResult result;
         result.extra_stats.emplace_back("model_consistent = false");
         result.complete = true;
-        // if (params.proof)
-        //     params.proof->finish_unsat_proof();
         return result;
     }
     std::cout << "Start solve" << std::endl;
