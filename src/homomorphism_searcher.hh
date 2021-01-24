@@ -72,6 +72,23 @@ struct HomomorphismAssignments
                 return a.assignment == assignment;
                 });
     }
+
+    void print() const
+    {
+        std::cout << "Printing " << values.size() << " assignments." << std::endl;
+        for (const auto& assignment : values) {
+            std::cout << std::endl;
+            std::cout << "Pattern vertex: " << assignment.assignment.pattern_vertex << " Target vertex: " << assignment.assignment.target_vertex << std::endl;
+        }
+    }
+
+    void print(InputGraph& input_graph) const
+    {
+        std::cout << "Printing " << values.size() << " assignments." << std::endl;
+        for (const auto& assignment : values) {
+            std::cout << "Pattern vertex: " << input_graph.vertex_name(assignment.assignment.pattern_vertex) << " Target vertex: " << input_graph.vertex_name(assignment.assignment.target_vertex) << std::endl;
+        }
+    }
 };
 
 using DuplicateSolutionFilterer = const std::function<auto (const HomomorphismAssignments &) -> bool>;

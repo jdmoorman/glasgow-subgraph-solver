@@ -15,6 +15,7 @@ Should be used when computationally feasible.
 #include <string>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 using std::greater;
 using std::list;
@@ -34,18 +35,20 @@ HomomorphismModel::HomomorphismModel(const InputGraph & target, const InputGraph
 {
     // Resize vector recording integers corresponding to each edge's label.
     _imp->target_edge_labels.resize(target_size * target_size);
-
     // Fill edge_labels_map labels -> int and edge_labels with labels.
     _record_edge_labels(_imp->target_edge_labels_map, target, _imp->target_edge_labels);
 
     // // TODO: Find better way to get indices.
     // Form edge compatibility matrix.
+    std::cout<< "Compat table" << std::endl;
     edge_label_compatibility.resize(_imp->pattern_edge_labels_map.size(), vector<bool>(_imp->target_edge_labels_map.size()));
     for (const auto& [labels1, label1_id] : _imp->pattern_edge_labels_map) {
         for (const auto& [labels2, label2_id] : _imp->target_edge_labels_map) {
             // TODO: Deal with the induced case.
             edge_label_compatibility[label1_id][label2_id] = check_edge_label_compatibility(labels1, labels2);
+            std::cout << edge_label_compatibility[label1_id][label2_id];
         }
+        std::cout << std::endl;
     }
 
     // recode target to a bit graph, and take out loops
