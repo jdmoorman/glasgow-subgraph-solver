@@ -19,7 +19,6 @@ SOURCES := \
     proof.cc \
     restarts.cc \
     svo_bitset.cc \
-    sip_decomposer.cc \
     symmetries.cc \
     thread_utils.cc \
     timeout.cc \
