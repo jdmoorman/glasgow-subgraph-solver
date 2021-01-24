@@ -38,7 +38,7 @@ if ! grep '^solution_count = 6$' <(./glasgow_subgraph_solver --count-solutions -
 fi
 
 if ! grep '^solution_count = 123$' <(./glasgow_subgraph_solver --count-solutions --format csv test-instances/c3_with_labels.csv test-instances/c3c2_with_labels.csv ) ; then
-    echo "cyclic enumerate test failed" 1>&1
+    echo "cyclic enumerate test with labels failed" 1>&1
     exit 1
 fi
 
