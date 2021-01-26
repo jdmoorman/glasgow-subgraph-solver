@@ -13,7 +13,7 @@
 class CrosswordHomomorphismModel : public BaseHomomorphismModel
 {
     protected:
-        std::vector<std::string> vertex_names;
+        std::vector<std::string> target_vertex_names;
         std::vector<std::multiset<std::string>> id_to_pattern_edge_labels;
 
     public:

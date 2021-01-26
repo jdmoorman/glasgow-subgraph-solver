@@ -13,14 +13,15 @@ using std::vector;
 using std::string;
 using std::multiset;
 using std::bitset;
+using std::tolower;
 
 CrosswordHomomorphismModel::CrosswordHomomorphismModel(const InputGraph & target, const InputGraph & pattern, const HomomorphismParams & params) :
     BaseHomomorphismModel(target, pattern, params)
 {
     // Fill vector of vertex names.
-    vertex_names.resize(target_size);
+    target_vertex_names.resize(target_size);
     for (unsigned i = 0 ; i < target_size ; ++i) {
-        vertex_names[i] = target.vertex_name(i);
+        target_vertex_names[i] = target.vertex_name(i);
     }
 
     // Fill vector mapping ids to pattern edge label multisets.
@@ -30,17 +31,15 @@ CrosswordHomomorphismModel::CrosswordHomomorphismModel(const InputGraph & target
     }
 
     // Create bitset of characters in each word.
-    /** This takes 393446 ms for 77705, whereas using a bitset for each letter
+    /** This takes 393446 ms for 77705 words, whereas using a bitset for each letter
         takes 1.36097e+06 ms for the same number of words.
     */
     vector<bitset<26>> vertex_bitsets (target_size);
-    for (unsigned i = 0; i < vertex_names.size() ; i++){
-        for (unsigned j = 0; j < vertex_names[i].length(); j++) {
-            char letter = vertex_names[i][j];
-            if (vertex_names[i][j] < 97)  // A-Z
-                vertex_bitsets[i].set(letter - 65);
-            else  // a-z
-                vertex_bitsets[i].set(letter - 97);
+    for (unsigned i = 0; i < target_vertex_names.size() ; i++){
+        string vertex_name = target_vertex_names[i];
+        for (unsigned j = 0; j < vertex_name.length(); j++) {
+            char letter = tolower(vertex_name[j]); // a-z
+            vertex_bitsets[i].set(letter - 97);
         }
     }
 
@@ -53,10 +52,10 @@ CrosswordHomomorphismModel::CrosswordHomomorphismModel(const InputGraph & target
 
     std::cout << "Making adjacency matrix bitset" << std::endl;
     std::clock_t c_start = std::clock();
-    for (unsigned i = 0; i < vertex_names.size() ; i++){
-        std::cout << "\rDoing " << i << " of " << vertex_names.size();
+    for (unsigned i = 0; i < target_vertex_names.size() ; i++){
+        std::cout << "\rDoing " << i << " of " << target_vertex_names.size();
         bitset word1_chars = vertex_bitsets[i];
-        for (unsigned j = i+1; j < vertex_names.size(); j++) {
+        for (unsigned j = i+1; j < target_vertex_names.size(); j++) {
             bitset word2_chars = vertex_bitsets[j];
             if ((word1_chars & word2_chars).any()) {
                 _imp->target_graph_rows[i * max_graphs + 0].set(j);
@@ -93,5 +92,6 @@ auto CrosswordHomomorphismModel::check_edge_label_compatibility(const int t_v1, 
     }
 
     // Indicate whether the indicated intersection occurs in the vertices.
-    return vertex_names[t_v1][i] == vertex_names[t_v2][j];
+    return target_vertex_names[t_v1][i] == target_vertex_names[t_v2][j];
+}
 }
