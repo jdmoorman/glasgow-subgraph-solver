@@ -11,6 +11,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <iostream>
 #include <stdexcept>
 
 using std::greater;
@@ -28,9 +29,10 @@ using std::multiset;
 
 namespace
 {
+    // Number of auxiliary/derived graphs to be computed from the input graph.
     auto calculate_n_shape_graphs(const HomomorphismParams & params) -> unsigned
     {
-        return 1 +
+        return 1 +  //Initial graph
             (supports_exact_path_graphs(params) ? params.number_of_exact_path_graphs : 0) +
             (supports_distance3_graphs(params) ? 1 : 0) +
             (supports_k4_graphs(params) ? 1 : 0);
@@ -181,9 +183,9 @@ auto BaseHomomorphismModel::check_edge_label_compatibility(const multiset<string
     return true;
 }
 
-// TODO: change name
-auto BaseHomomorphismModel::_check_label_compatibility(const int p, const int t) const -> bool
+auto BaseHomomorphismModel::_check_vertex_label_compatibility(const int p, const int t) const -> bool
 {
+    std::cout << "Cry if printing for cword" << std::endl;
     if (! has_vertex_labels())
         return true;
     else
@@ -252,23 +254,18 @@ auto BaseHomomorphismModel::_check_degree_compatibility(
 
 auto BaseHomomorphismModel::initialise_domains(vector<HomomorphismDomain> & domains) const -> bool
 {
-    unsigned graphs_to_consider = max_graphs;
-
-    /* pattern and target neighbourhood degree sequences */
-    vector<vector<vector<int> > > patterns_ndss(graphs_to_consider);
-    vector<vector<optional<vector<int> > > > targets_ndss(graphs_to_consider);
+    // Pattern and target neighbourhood degree sequences.
+    vector<vector<vector<int> > > patterns_ndss(max_graphs);
+    vector<vector<optional<vector<int> > > > targets_ndss(max_graphs);
 
     if (degree_and_nds_are_preserved(_imp->params) && ! _imp->params.no_nds) {
-        for (unsigned g = 0 ; g < graphs_to_consider ; ++g) {
+        // Record degrees for neighbors of each node in the pattern graph.
+        for (unsigned g = 0 ; g < max_graphs ; ++g) {
             patterns_ndss.at(g).resize(pattern_size);
             targets_ndss.at(g).resize(target_size);
-        }
-
-        for (unsigned g = 0 ; g < graphs_to_consider ; ++g) {
             for (unsigned i = 0 ; i < pattern_size ; ++i) {
                 auto ni = pattern_graph_row(g, i);
-                for (auto j = ni.find_first() ; j != SVOBitset::npos ; j = ni.find_first()) {
-                    ni.reset(j);
+                for (auto j = ni.find_first() ; j != SVOBitset::npos ; j = ni.find_next(j+1)) {
                     patterns_ndss.at(g).at(i).push_back(pattern_degree(g, j));
                 }
                 sort(patterns_ndss.at(g).at(i).begin(), patterns_ndss.at(g).at(i).end(), greater<int>());
@@ -414,24 +411,27 @@ auto BaseHomomorphismModel::prepare() -> bool
     return true;
 }
 
+/** Construct a new adjacency array with edges between nodes if the nodes have at
+    least number_of_exact_path_graphs paths of length two between them.
+*/
 auto BaseHomomorphismModel::_build_exact_path_graphs(vector<SVOBitset> & graph_rows, unsigned size, unsigned & idx,
         unsigned number_of_exact_path_graphs, bool directed) -> void
 {
     vector<vector<unsigned> > path_counts(size, vector<unsigned>(size, 0));
 
     // count number of paths from w to v (unless directed, only w >= v, so not v to w)
+    // Record number of paths of length 2 from v to w.
     for (unsigned v = 0 ; v < size ; ++v) {
-        auto nv = graph_rows[v * max_graphs + 0];
-        for (auto c = nv.find_first() ; c != decltype(nv)::npos ; c = nv.find_first()) {
-            nv.reset(c);
+        auto nv = &graph_rows[v * max_graphs + 0];
+        for (auto c = nv->find_first() ; c != SVOBitset::npos ; c = nv->find_next(c+1)) {
             auto nc = graph_rows[c * max_graphs + 0];
-            for (auto w = nc.find_first() ; w != decltype(nc)::npos && (directed ? true : w <= v) ; w = nc.find_first()) {
-                nc.reset(w);
+            for (auto w = nc.find_first() ; w != SVOBitset::npos && (directed ? true : w <= v) ; w = nc.find_next(w+1)) {
                 ++path_counts[v][w];
             }
         }
     }
 
+    // Record if there are at least `p` paths of length 2 in aux/derived graph.
     for (unsigned v = 0 ; v < size ; ++v) {
         for (unsigned w = (directed ? 0 : v) ; w < size ; ++w) {
             // unless directed, w to v, not v to w, see above
@@ -446,6 +446,7 @@ auto BaseHomomorphismModel::_build_exact_path_graphs(vector<SVOBitset> & graph_r
         }
     }
 
+    // Shift idx to next available graph.
     idx += number_of_exact_path_graphs;
 }
 
