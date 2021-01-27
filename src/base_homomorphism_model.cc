@@ -185,7 +185,6 @@ auto BaseHomomorphismModel::check_edge_label_compatibility(const multiset<string
 
 auto BaseHomomorphismModel::_check_vertex_label_compatibility(const int p, const int t) const -> bool
 {
-    std::cout << "Cry if printing for cword" << std::endl;
     if (! has_vertex_labels())
         return true;
     else
