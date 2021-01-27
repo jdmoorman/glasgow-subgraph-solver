@@ -1,5 +1,5 @@
-The Glasgow Subgraph Solver
-===========================
+The Glasgow Subgraph Solver for Solving Crosswords
+==================================================
 
 This is a solver for subgraph isomorphism (induced and non-induced) problems, based upon a series of
 papers by subsets of Blair Archibald, Ciaran McCreesh, Patrick Prosser and James Trimble at the
@@ -26,14 +26,7 @@ Running
 To run:
 
 ```shell session
-$ ./glasgow_subgraph_solver pattern-file target-file
-```
-
-If you would like induced subgraph isomorphisms rather than non-induced (that is, if non-adjacent
-vertices must be mapped to non-adjacent vertices), you must request it:
-
-```shell session
-$ ./glasgow_subgraph_solver --induced pattern-file target-file
+$ ./glasgow_subgraph_solver --crossword pattern-file target-file
 ```
 
 The default mode is to display the first found solution, or to prove unsatisfiability if no solution
@@ -56,11 +49,7 @@ Note that parallel search, in its default configuration, is non-deterministic.
 File Formats
 ------------
 
-We try to auto-detect the input format, but it's best to specify it using, for example:
-
-```shell session
-$ ./glasgow_subgraph_solver --format lad pattern-file target-file
-```
+We expect the files to csvs.
 
 In particular, note that auto-detection can easily fail if, for example, the first vertex in the
 graph has no neighbours.  We can read LAD, Labelled LAD (labels on vertices, and optionally also on
@@ -84,66 +73,6 @@ third,,square
 fourth,,square
 ```
 
-Symmetries
-----------
-
-Symmetry elimination support is currently very experimental, only usable on pattern symmetries, and
-is probably only useful for solution counting. To use it, you must have the GAP computer algebra
-system in your PATH as 'gap', with the 'digraph' library installed. Then, do:
-
-```shell session
-$ ./glasgow_clique_solver --pattern-symmetries --count-solutions pattern-file target-file
-```
-
-Proof Logging
--------------
-
-As a highly experimental feature, the solver can output a proof log. First, install the following
-program:
-
-* VeriPB from https://github.com/StephanGocht/VeriPB/ .
-
-And then you can produce and verify a log like this:
-
-```shell session
-$ ./glasgow_subgraph_solver --no-supplementals --no-clique-detection --no-nds \
-    --prove myproof --proof-solutions pattern-file target-file
-$ veripb myproof.opb myproof.log
-```
-
-Note that most features are not yet supported with proof logging. This is a "not yet implemented"
-problem, not a fundamental restriction.
-
-Clique Solving
---------------
-
-To run the clique solver, use:
-
-```shell session
-$ ./glasgow_clique_solver graph-file
-```
-
-Details on the Algorithms
--------------------------
-
-The subgraph solver is a constraint programming style backtracker, which recursively builds up a
-mapping from pattern vertices to target vertices. It includes inference based upon paths (not just
-adjacency) and neighbourhood degree sequences, has a fast all-different propagator, and uses
-sophisticated variable- and value-ordering heuristics to direct a slightly-random restarting search.
-
-Chronologically, our first subgraph isomorphism solver is [cp/McCreeshP15]. We introduced new
-variants of this solver in [lion/KotthoffMS16], and described a refactored version (which can solve
-an optimisation variant of the problem) in [aaai/HoffmannMR17]. We also investigated search ordering
-heuristics in more detail in [jair/McCreeshPST18], and [cpaior/ArchibaldDHMPT19] describes its new
-restarting search algorithm. There is currently no paper describing the entire algorithm, but
-[icgt/McCreeshPT20] summarises the main aspects of it.
-
-The clique solver (with its default configuration) is a branch and bound solver that uses a greedy
-colouring both as the bound function, and as a branching heuristic. It is based upon the "domains of
-size two first" variant described in [cp/McCreeshP14], which is in turn derived from the "MCSa1"
-algorithm described by [algorithms/Prosser12] combined with the bit-parallelism techniques discussed
-by [ol/SegundoMRH13]; this in turn is a simplification of "MCS" described by [walcom/TomitaSHTW10].
-The solver also incorporates the fast clique detection technique described by [jco/BatsynGMP14].
 
 Funding Acknowledgements
 ------------------------
