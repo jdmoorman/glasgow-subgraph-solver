@@ -1,6 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 #include "crossword_homomorphism_model.hh"
+#include "homomorphism_model.hh"
 #include "formats/read_file_format.hh"
 #include "homomorphism.hh"
 #include "homomorphism_params.hh"
@@ -62,7 +63,8 @@ auto main(int argc, char * argv[]) -> int
             ("locally-injective",                            "Require only local injectivity")
             ("count-solutions",                              "Count the number of solutions")
             ("print-all-solutions",                          "Print out every solution, rather than one")
-            ("induced",                                      "Find an induced mapping");
+            ("induced",                                      "Find an induced mapping")
+            ("crossword",                                    "Use the crossword optimized solver");
         display_options.add(problem_options);
 
         po::options_description input_options{ "Input file options" };
@@ -362,8 +364,16 @@ auto main(int argc, char * argv[]) -> int
             cout << "pattern_automorphism_group_size = " << pattern_automorphism_group_size << endl;
 
         // THIS IS THE CALL TO SOLVE
-        CrosswordHomomorphismModel model(target, pattern, params);
-        auto result = solve_homomorphism_problem(model, params);
+        // TODO: Find a better way to define model based on input.
+        HomomorphismResult result;
+        if (options_vars.count("crossword")){
+            CrosswordHomomorphismModel model(target, pattern, params);
+            result = solve_homomorphism_problem(model, params);
+        }
+        else{
+            HomomorphismModel model(target, pattern, params);
+            result = solve_homomorphism_problem(model, params);
+        }
 
         /* Stop the clock. */
         auto overall_time = duration_cast<milliseconds>(steady_clock::now() - params.start_time);
