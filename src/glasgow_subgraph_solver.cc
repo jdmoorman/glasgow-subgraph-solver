@@ -340,16 +340,6 @@ auto main(int argc, char * argv[]) -> int
             };
         }
 
-        // if (options_vars.count("prove")) {
-        //     bool friendly_names = options_vars.count("proof-names");
-        //     bool compress_proof = options_vars.count("compress-proof");
-        //     string fn = options_vars["prove"].as<string>();
-        //     string suffix = compress_proof ? ".bz2" : "";
-        //     params.proof = make_unique<Proof>(fn + ".opb", fn + ".log", friendly_names, compress_proof);
-        //     cout << "proof_model = " << fn << ".opb" << suffix << endl;
-        //     cout << "proof_log = " << fn << ".log" << suffix << endl;
-        // }
-
         cout << "pattern_vertices = " << pattern.size() << endl;
         cout << "pattern_directed_edges = " << pattern.number_of_directed_edges() << endl;
         cout << "target_vertices = " << target.size() << endl;
