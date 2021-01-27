@@ -80,11 +80,12 @@ struct HomomorphismParams
     /// Use k4 filtering?
     bool k4 = false;
 
+    // FOR CROSSWORDS, number_of_exact_path_graphs IS NOT HELPFUL AS IS. TOO DENSE AND SLOW.
     /// Disable all supplemental graphs?
-    bool no_supplementals = false;
+    bool no_supplementals = true;
 
     /// How many exact path graphs do we have, if we have any?
-    int number_of_exact_path_graphs = 4;
+    int number_of_exact_path_graphs = 0;
 
     /// Disable neighbourhood degree sequence processing?
     bool no_nds = false;
