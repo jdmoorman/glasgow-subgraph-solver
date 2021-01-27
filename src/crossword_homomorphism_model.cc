@@ -4,13 +4,15 @@
 #include <ctime>
 #include <bitset>
 #include <iostream>
-#include <vector>
-#include <string>
 #include <set>
 #include <stdexcept>
+#include <string>
+#include <string_view>
+#include <vector>
 
 using std::vector;
 using std::string;
+using std::string_view;
 using std::multiset;
 using std::bitset;
 using std::tolower;
@@ -22,6 +24,14 @@ CrosswordHomomorphismModel::CrosswordHomomorphismModel(const InputGraph & target
     target_vertex_names.resize(target_size);
     for (unsigned i = 0 ; i < target_size ; ++i) {
         target_vertex_names[i] = target.vertex_name(i);
+    }
+
+    /** Fill vector of pattern vertex labels indicating preplaced letters.
+        Should have the form "__a_e"
+    */
+    pattern_vertex_label_strs.resize(pattern_size);
+    for (unsigned i = 0 ; i < pattern_size ; ++i) {
+        target_vertex_names[i] = pattern.vertex_label(i);
     }
 
     // Fill vector mapping ids to pattern edge label multisets.
@@ -94,4 +104,28 @@ auto CrosswordHomomorphismModel::check_edge_label_compatibility(const int t_v1, 
     // Indicate whether the indicated intersection occurs in the vertices.
     return target_vertex_names[t_v1][i] == target_vertex_names[t_v2][j];
 }
+
+
+auto CrosswordHomomorphismModel::_check_vertex_label_compatibility(const int p, const int t) const -> bool
+{
+    std::cout << "Yay if printing for cword" << std::endl;
+
+    string_view plabel = pattern_vertex_label_strs[p];
+    string tlabel = target_vertex_names[t];
+
+    // TODO: Give the pattern vertices labels.
+    // TODO: Even pattern vertices without any required letters will need labels like '______'
+    // Ensure equal lengths.
+    if (plabel.length() != tlabel.length()) {
+        return false;
+    }
+
+    // Ensure all letters in pattern label occur in target word (name) in the correct place.
+    for (unsigned i = 0; i < plabel.length(); i++) {
+        if ((plabel[i] != '_') && (tolower(plabel[i]) != tolower(tlabel[i]))) {
+            return false;
+        }
+    }
+
+    return true;
 }

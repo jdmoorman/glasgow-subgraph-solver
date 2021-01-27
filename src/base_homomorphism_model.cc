@@ -203,42 +203,40 @@ auto BaseHomomorphismModel::_check_loop_compatibility(int p, int t) const -> boo
 auto BaseHomomorphismModel::_check_degree_compatibility(
         int p,
         int t,
-        unsigned graphs_to_consider,
+        unsigned max_graphs,
         vector<vector<vector<int> > > & patterns_ndss,
-        vector<vector<optional<vector<int> > > > & targets_ndss,
-        bool do_not_do_nds_yet
+        vector<vector<optional<vector<int> > > > & targets_ndss
         ) const -> bool
 {
     if (! degree_and_nds_are_preserved(_imp->params))
         return true;
 
-    for (unsigned g = 0 ; g < graphs_to_consider ; ++g) {
+    for (unsigned g = 0 ; g < max_graphs ; ++g) {
         if (target_degree(g, t) < pattern_degree(g, p)) {
             return false;
         }
         else if (degree_and_nds_are_exact(_imp->params, pattern_size, target_size)
                 && target_degree(g, t) != pattern_degree(g, p)) {
-            // not ok, degrees must be exactly the same
+            // not ok, degrees must be exactly the same (induced, same size)
             return false;
         }
     }
-    if (_imp->params.no_nds || do_not_do_nds_yet)
+    if (_imp->params.no_nds)
         return true;
 
     // full compare of neighbourhood degree sequences
     if (! targets_ndss.at(0).at(t)) {
-        for (unsigned g = 0 ; g < graphs_to_consider ; ++g) {
+        for (unsigned g = 0 ; g < max_graphs ; ++g) {
             targets_ndss.at(g).at(t) = vector<int>{};
             auto ni = target_graph_row(g, t);
-            for (auto j = ni.find_first() ; j != SVOBitset::npos ; j = ni.find_first()) {
-                ni.reset(j);
+            for (auto j = ni.find_first() ; j != SVOBitset::npos ; j = ni.find_next(j+1)) {
                 targets_ndss.at(g).at(t)->push_back(target_degree(g, j));
             }
             sort(targets_ndss.at(g).at(t)->begin(), targets_ndss.at(g).at(t)->end(), greater<int>());
         }
     }
 
-    for (unsigned g = 0 ; g < graphs_to_consider ; ++g) {
+    for (unsigned g = 0 ; g < max_graphs ; ++g) {
         for (unsigned x = 0 ; x < patterns_ndss.at(g).at(p).size() ; ++x) {
             if (targets_ndss.at(g).at(t)->at(x) < patterns_ndss.at(g).at(p).at(x)) {
                 return false;
@@ -278,21 +276,16 @@ auto BaseHomomorphismModel::initialise_domains(vector<HomomorphismDomain> & doma
         }
     }
 
+    // Record candidates for each pattern vertex from target.
     for (unsigned i = 0 ; i < pattern_size ; ++i) {
         domains.at(i).v = i;
         domains.at(i).values.reset();
 
+        // Find initial candidates for pattern vertex `i`.
         for (unsigned j = 0 ; j < target_size ; ++j) {
-            bool ok = true;
-
-            if (! _check_label_compatibility(i, j))
-                ok = false;
-            else if (! _check_loop_compatibility(i, j))
-                ok = false;
-            else if (! _check_degree_compatibility(i, j, graphs_to_consider, patterns_ndss, targets_ndss, _imp->params.proof.get()))
-                ok = false;
-
-            if (ok)
+            if (_check_vertex_label_compatibility(i, j)
+                && _check_loop_compatibility(i, j)
+                && _check_degree_compatibility(i, j, max_graphs, patterns_ndss, targets_ndss))
                 domains.at(i).values.set(j);
         }
 

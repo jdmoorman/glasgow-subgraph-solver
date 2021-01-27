@@ -7,12 +7,9 @@
 #include "svo_bitset.hh"
 #include "homomorphism_params.hh"
 #include "homomorphism_domain.hh"
-// #include "proof.hh"
 
 #include <memory>
 #include <set>
-
-
 #include <functional>
 #include <list>
 #include <map>
@@ -68,13 +65,12 @@ class BaseHomomorphismModel
                 int t,
                 unsigned graphs_to_consider,
                 std::vector<std::vector<std::vector<int> > > & patterns_ndss,
-                std::vector<std::vector<std::optional<std::vector<int> > > > & targets_ndss,
-                bool do_not_do_nds_yet
+                std::vector<std::vector<std::optional<std::vector<int> > > > & targets_ndss
                 ) const -> bool;
 
         auto _check_loop_compatibility(int p, int t) const -> bool;
 
-        auto _check_label_compatibility(const int p, const int t) const -> bool;
+        auto _check_vertex_label_compatibility(const int p, const int t) const -> bool;
 
         auto _multiset_item_counts(const std::multiset<std::string>&) const -> std::map<std::string, int>;
 
