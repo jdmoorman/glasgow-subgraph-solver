@@ -366,8 +366,6 @@ auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & 
     if constexpr (has_edge_labels_) {
         // if we're adjacent in the original graph, additionally the edge labels need to match up
         if (graph_pairs_to_consider & (1u << 0)) {
-            std::cout << "Considering forward pairs." << std::endl;
-
             auto check_d_values = d.values;
             int pattern_edge_lid = model.pattern_edge_label(current_assignment.pattern_vertex, d.v);
             for (auto c = check_d_values.find_first() ; c != decltype(check_d_values)::npos ; c = check_d_values.find_first()) {
@@ -382,9 +380,7 @@ auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & 
 
         const auto & reverse_edge_graph_pairs_to_consider = model.pattern_adjacency_bits(d.v, current_assignment.pattern_vertex);
         if (reverse_edge_graph_pairs_to_consider & (1u << 0)) {
-            std::cout << "Considering reverse pairs." << std::endl;
             auto check_d_values = d.values;
-
             auto reverse_pattern_edge_lid = model.pattern_edge_label(d.v, current_assignment.pattern_vertex);
             for (auto c = check_d_values.find_first() ; c != decltype(check_d_values)::npos ; c = check_d_values.find_first()) {
                 check_d_values.reset(c);
@@ -537,6 +533,7 @@ auto HomomorphismSearcher::propagate(Domains & new_domains, HomomorphismAssignme
     for (typename Domains::iterator branch_domain = find_unit_domain() ;
             branch_domain != new_domains.end() ;
             branch_domain = find_unit_domain()) {
+        assignments.print();
         // what are we assigning?
         HomomorphismAssignment current_assignment = { branch_domain->v, unsigned(branch_domain->values.find_first()) };
 

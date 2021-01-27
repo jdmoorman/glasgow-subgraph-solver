@@ -77,7 +77,6 @@ struct HomomorphismAssignments
     {
         std::cout << "Printing " << values.size() << " assignments." << std::endl;
         for (const auto& assignment : values) {
-            std::cout << std::endl;
             std::cout << "Pattern vertex: " << assignment.assignment.pattern_vertex << " Target vertex: " << assignment.assignment.target_vertex << std::endl;
         }
     }
