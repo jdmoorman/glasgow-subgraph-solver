@@ -100,7 +100,7 @@ auto HomomorphismSearcher::restarting_search(
     vector<int> branch_v(model.target_size);
 
     unsigned branch_v_end = 0;
-    for (auto f_v = remaining.find_first() ; f_v != decltype(remaining)::npos ; f_v = remaining.find_first()) {
+    for (auto f_v = remaining.find_first() ; f_v != SVOBitset::npos ; f_v = remaining.find_first()) {
         remaining.reset(f_v);
         branch_v[branch_v_end++] = f_v;
     }
