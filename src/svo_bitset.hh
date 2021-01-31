@@ -107,22 +107,14 @@ class SVOBitset
         // TODO: Should we return n_words instead of npos?
         auto find_next(unsigned start_id) const -> unsigned
         {
-            if (! _is_long()) {
-                for (unsigned i = start_id ; i < n_words ; ++i) {
-                    int x = __builtin_ffsll(_data.short_data[i]);
-                    if (x != 0)
-                        return i * bits_per_word + x - 1;
-                }
-                return npos;
+            for (unsigned i = start_id / bits_per_word ; i < n_words ; ++i) {
+                auto word = _is_long() ? _data.long_data[i] : _data.short_data[i];
+                auto offset = start_id % bits_per_word;
+                int x = __builtin_ffsll(word >> offset);
+                if (x != 0)
+                    return i * bits_per_word + x + offset - 1;
             }
-            else {
-                for (unsigned i = start_id ; i < n_words ; ++i) {
-                    int x = __builtin_ffsll(_data.long_data[i]);
-                    if (x != 0)
-                        return i * bits_per_word + x - 1;
-                }
-                return npos;
-            }
+            return npos;
         }
 
         auto find_first() const -> unsigned
