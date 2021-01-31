@@ -8,7 +8,7 @@
 #include <cstring>
 #include <limits>
 
-// TODO: Handle short_data and long_data in a better way.
+// TODO: Replace if elses with _is_long() ? _data.long_data[i] : _data.short_data[i];
 class SVOBitset
 {
     private:
