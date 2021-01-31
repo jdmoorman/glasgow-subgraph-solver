@@ -98,10 +98,8 @@ auto HomomorphismSearcher::restarting_search(
     auto remaining = branch_domain->values;
 
     vector<int> branch_v(model.target_size);
-
     unsigned branch_v_end = 0;
-    for (auto f_v = remaining.find_first() ; f_v != SVOBitset::npos ; f_v = remaining.find_first()) {
-        remaining.reset(f_v);
+    for (auto f_v = remaining.find_first() ; f_v != SVOBitset::npos ; f_v = remaining.find_next(f_v+1)) {
         branch_v[branch_v_end++] = f_v;
     }
 
@@ -533,7 +531,6 @@ auto HomomorphismSearcher::propagate(Domains & new_domains, HomomorphismAssignme
     for (typename Domains::iterator branch_domain = find_unit_domain() ;
             branch_domain != new_domains.end() ;
             branch_domain = find_unit_domain()) {
-        assignments.print();
         // what are we assigning?
         HomomorphismAssignment current_assignment = { branch_domain->v, unsigned(branch_domain->values.find_first()) };
 
