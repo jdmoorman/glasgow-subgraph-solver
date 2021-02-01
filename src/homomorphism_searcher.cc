@@ -366,7 +366,7 @@ auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & 
         if (graph_pairs_to_consider & (1u << 0)) {
             auto check_d_values = d.values;
             int pattern_edge_lid = model.pattern_edge_label(current_assignment.pattern_vertex, d.v);
-            for (auto c = check_d_values.find_first() ; c != decltype(check_d_values)::npos ; c = check_d_values.find_first()) {
+            for (auto c = check_d_values.find_first() ; c != SVOBitset::npos ; c = check_d_values.find_next(c+1)) {
                 check_d_values.reset(c);
 
                 // Check compatibility
@@ -380,7 +380,7 @@ auto HomomorphismSearcher::propagate_adjacency_constraints(HomomorphismDomain & 
         if (reverse_edge_graph_pairs_to_consider & (1u << 0)) {
             auto check_d_values = d.values;
             auto reverse_pattern_edge_lid = model.pattern_edge_label(d.v, current_assignment.pattern_vertex);
-            for (auto c = check_d_values.find_first() ; c != decltype(check_d_values)::npos ; c = check_d_values.find_first()) {
+            for (auto c = check_d_values.find_first() ; c != SVOBitset::npos ; c = check_d_values.find_first()) {
                 check_d_values.reset(c);
 
                 // Check compatibility
@@ -466,14 +466,14 @@ auto HomomorphismSearcher::propagate_less_thans(Domains & new_domains) -> bool
 
        // first value of b must be at least one after the first possible value of a
        auto first_a = a_domain.values.find_first();
-       if (first_a == decltype(a_domain.values)::npos)
+       if (first_a == SVOBitset::npos)
            return false;
        auto first_allowed_b = first_a + 1;
 
        if (first_allowed_b >= model.target_size)
            return false;
 
-       for (auto v = b_domain.values.find_first() ; v != decltype(b_domain.values)::npos ; v = b_domain.values.find_first()) {
+       for (auto v = b_domain.values.find_first() ; v != SVOBitset::npos ; v = b_domain.values.find_next(v+1)) {
            if (v >= first_allowed_b)
                break;
            b_domain.values.reset(v);
@@ -492,10 +492,9 @@ auto HomomorphismSearcher::propagate_less_thans(Domains & new_domains) -> bool
         auto & b_domain = new_domains[find_domain[b]];
 
         // last value of a must be at least one before the last possible value of b
-        auto b_values_copy = b_domain.values;
+        // auto b_values_copy = b_domain.values;
         auto last_b = b_domain.values.find_first();
-        for (auto v = last_b ; v != decltype(b_values_copy)::npos ; v = b_values_copy.find_first()) {
-            b_values_copy.reset(v);
+        for (auto v = last_b ; v != SVOBitset::npos ; v = b_domain.values.find_next(v+1)) {
             last_b = v;
         }
 
@@ -503,9 +502,7 @@ auto HomomorphismSearcher::propagate_less_thans(Domains & new_domains) -> bool
             return false;
         auto last_allowed_a = last_b - 1;
 
-        auto a_values_copy = a_domain.values;
-        for (auto v = a_values_copy.find_first() ; v != decltype(a_values_copy)::npos ; v = a_values_copy.find_first()) {
-            a_values_copy.reset(v);
+        for (auto v = a_domain.values.find_first() ; v != SVOBitset::npos ; v = a_domain.values.find_next(v+1)) {
             if (v > last_allowed_a)
                 a_domain.values.reset(v);
         }

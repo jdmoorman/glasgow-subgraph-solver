@@ -81,7 +81,7 @@ namespace
                     if constexpr (proof_) {
                         vector<int> rhs;
                         auto d = domains_so_far;
-                        for (auto v = d.find_first() ; v != decltype(d)::npos ; v = d.find_first()) {
+                        for (auto v = d.find_first() ; v != SVOBitset::npos ; v = d.find_next(v+1)) {
                             d.reset(v);
                             rhs.push_back(v);
                         }
@@ -96,8 +96,7 @@ namespace
                         hall_lhs = lhs;
                         hall_rhs.clear();
                         auto d = domains_so_far;
-                        for (auto v = d.find_first() ; v != decltype(d)::npos ; v = d.find_first()) {
-                            d.reset(v);
+                        for (auto v = d.find_first() ; v != SVOBitset::npos ; v = d.find_next(v+1)) {
                             hall_rhs.push_back(v);
                         }
                     }
