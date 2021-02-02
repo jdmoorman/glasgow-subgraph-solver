@@ -29,9 +29,9 @@ CrosswordHomomorphismModel::CrosswordHomomorphismModel(const InputGraph & target
     /** Fill vector of pattern vertex labels indicating preplaced letters.
         Should have the form "__a_e"
     */
-    pattern_vertex_label_strs.resize(pattern_size);
+    pattern_vertex_labels.resize(pattern_size);
     for (unsigned i = 0 ; i < pattern_size ; ++i) {
-        target_vertex_names[i] = pattern.vertex_label(i);
+        pattern_vertex_labels[i] = pattern.vertex_label(i);
     }
 
     // Fill vector mapping ids to pattern edge label multisets.
@@ -110,7 +110,7 @@ auto CrosswordHomomorphismModel::_check_vertex_label_compatibility(const int p, 
 {
     std::cout << "Yay if printing for cword" << std::endl;
 
-    string_view plabel = pattern_vertex_label_strs[p];
+    string_view plabel = pattern_vertex_labels[p];
     string tlabel = target_vertex_names[t];
 
     // TODO: Give the pattern vertices labels.

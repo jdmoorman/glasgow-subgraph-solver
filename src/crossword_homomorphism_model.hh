@@ -16,7 +16,7 @@ class CrosswordHomomorphismModel : public BaseHomomorphismModel
     protected:
         std::vector<std::string> target_vertex_names;
         std::vector<std::multiset<std::string>> id_to_pattern_edge_labels;
-        std::vector<std::string_view> pattern_vertex_label_strs;
+        std::vector<std::string_view> pattern_vertex_labels;
 
     public:
         CrosswordHomomorphismModel(const InputGraph & target, const InputGraph & pattern, const HomomorphismParams & params);
