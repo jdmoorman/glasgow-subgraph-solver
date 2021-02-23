@@ -29,7 +29,7 @@ auto is_nonshrinking(const HomomorphismParams & params) -> bool
 
 auto degree_and_nds_are_preserved(const HomomorphismParams & params) -> bool
 {
-    return params.injectivity != Injectivity::NonInjective;
+    return (params.injectivity == Injectivity::Injective) || (params.injectivity == Injectivity::LocallyInjective);
 }
 
 auto degree_and_nds_are_exact(const HomomorphismParams & params, unsigned pattern_size, unsigned target_size) -> bool
