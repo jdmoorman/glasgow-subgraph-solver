@@ -209,9 +209,10 @@ auto BaseHomomorphismModel::_check_degree_compatibility(
         vector<vector<optional<vector<int> > > > & targets_ndss
         ) const -> bool
 {
-    if (! degree_and_nds_are_preserved(_imp->params))
+    if (! degree_and_nds_are_preserved(_imp->params) || ! _imp->filter_on_degrees)
         return true;
 
+    // Check degrees for pattern and target vertex are compatible.
     for (unsigned g = 0 ; g < max_graphs ; ++g) {
         if (target_degree(g, t) < pattern_degree(g, p)) {
             return false;
@@ -222,10 +223,12 @@ auto BaseHomomorphismModel::_check_degree_compatibility(
             return false;
         }
     }
+
     if (_imp->params.no_nds)
         return true;
 
     // full compare of neighbourhood degree sequences
+    // Record target neighbourhood degree sequences.
     if (! targets_ndss.at(0).at(t)) {
         for (unsigned g = 0 ; g < max_graphs ; ++g) {
             targets_ndss.at(g).at(t) = vector<int>{};
@@ -236,7 +239,7 @@ auto BaseHomomorphismModel::_check_degree_compatibility(
             sort(targets_ndss.at(g).at(t)->begin(), targets_ndss.at(g).at(t)->end(), greater<int>());
         }
     }
-
+    // Compare target and pattern neighbourhood degree sequences.
     for (unsigned g = 0 ; g < max_graphs ; ++g) {
         for (unsigned x = 0 ; x < patterns_ndss.at(g).at(p).size() ; ++x) {
             if (targets_ndss.at(g).at(t)->at(x) < patterns_ndss.at(g).at(p).at(x)) {
@@ -257,7 +260,9 @@ auto BaseHomomorphismModel::initialise_domains(vector<HomomorphismDomain> & doma
     vector<vector<vector<int> > > patterns_ndss(max_graphs);
     vector<vector<optional<vector<int> > > > targets_ndss(max_graphs);
 
-    if (degree_and_nds_are_preserved(_imp->params) && ! _imp->params.no_nds) {
+    if (degree_and_nds_are_preserved(_imp->params)
+        && ! _imp->params.no_nds
+        && _imp->filter_on_degrees) {
         // Record degrees for neighbors of each node in the pattern graph.
         for (unsigned g = 0 ; g < max_graphs ; ++g) {
             patterns_ndss.at(g).resize(pattern_size);
@@ -285,9 +290,12 @@ auto BaseHomomorphismModel::initialise_domains(vector<HomomorphismDomain> & doma
                 domains.at(i).values.set(j);
         }
 
+        // Count the number of candidates for each pattern vertex.
         domains.at(i).count = domains.at(i).values.count();
-        if (0 == domains.at(i).count)
+        if (0 == domains.at(i).count) {
+            std::cout << "No candidates for node "<< i << std::endl;
             return false;
+        }
     }
 
     // quick sanity check that we have enough values
@@ -296,8 +304,8 @@ auto BaseHomomorphismModel::initialise_domains(vector<HomomorphismDomain> & doma
         for (auto & d : domains)
             domains_union |= d.values;
 
-        unsigned domains_union_popcount = domains_union.count();
-        if (domains_union_popcount < unsigned(pattern_size)) {
+        if (domains_union.count() < pattern_size) {
+            std::cout << "Not enough values in target. " << std::endl;
             return false;
         }
     }

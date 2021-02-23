@@ -33,7 +33,7 @@ class BaseHomomorphismModel
             std::vector<std::vector<int> > patterns_degrees, targets_degrees;
             int largest_target_degree = 0;
             // TODO: Change has_less_thans variable name.
-            bool has_less_thans = false, directed = false;
+            bool has_less_thans = false, directed = false, filter_on_degrees = true;
 
             std::vector<int> pattern_vertex_labels, target_vertex_labels, pattern_edge_labels, target_edge_labels;
             // TODO: Discuss whether this is better as a vector or a map.

@@ -34,6 +34,9 @@ CrosswordHomomorphismModel::CrosswordHomomorphismModel(const InputGraph & target
         pattern_vertex_labels[i] = pattern.vertex_label(i);
     }
 
+    // Degrees aren't meaningful since target degrees are large.
+    _imp->filter_on_degrees = false;
+
     // Fill vector mapping ids to pattern edge label multisets.
     id_to_pattern_edge_labels.resize(_imp->pattern_edge_labels_map.size());
     for (auto const& [label, label_id] : _imp->pattern_edge_labels_map){
