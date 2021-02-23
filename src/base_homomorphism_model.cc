@@ -193,7 +193,7 @@ auto BaseHomomorphismModel::_check_vertex_label_compatibility(const int p, const
 
 auto BaseHomomorphismModel::_check_loop_compatibility(int p, int t) const -> bool
 {
-    if (pattern_has_loop(p) && ! target_has_loop(t))
+    if (pattern_has_loop(p) > target_has_loop(t))
         return false;
     else if (_imp->params.induced && (pattern_has_loop(p) != target_has_loop(t)))
         return false;
